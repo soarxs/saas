@@ -28,6 +28,7 @@ interface AppState {
   updateStock: (id: string, quantity: number, operation: 'add' | 'subtract' | 'set') => void;
   getLowStockProducts: () => Product[];
   syncProducts: () => void;
+  syncAllStores: () => void;
   
   // Sales
   sales: Sale[];
@@ -113,6 +114,17 @@ export const useStore = create<AppState>()(
       syncProducts: () => {
         const productStore = useProductStore.getState();
         set({ products: productStore.products });
+      },
+      syncAllStores: () => {
+        const productStore = useProductStore.getState();
+        const salesStore = useSalesStore.getState();
+        const tableStore = useTableStore.getState();
+        set({ 
+          products: productStore.products,
+          sales: salesStore.sales,
+          cart: salesStore.cart,
+          tables: tableStore.tables
+        });
       },
 
       // Sales

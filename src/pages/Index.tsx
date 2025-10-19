@@ -14,7 +14,7 @@ import NewOrderDialog from '../components/NewOrderDialog';
 import KitchenDisplay from '../components/KitchenDisplay';
 import DeliveryManager from '../components/DeliveryManager';
 import TableGrid from '../components/TableGrid';
-import TableDetailDialog from '../components/TableDetailDialog';
+import TableDialog from '../components/TableDialog';
 import { useKeyboardShortcuts, useShowShortcuts } from '../hooks/useKeyboardShortcuts';
 import { toast } from 'sonner';
 
@@ -113,7 +113,7 @@ const Index = () => {
         }
         // Se mesa selecionada, mostrar dialog da mesa
         return (
-          <TableDetailDialog
+          <TableDialog
             isOpen={true}
             tableNumber={selectedTable}
             onClose={() => setSelectedTable(null)}

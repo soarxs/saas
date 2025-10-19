@@ -33,19 +33,26 @@ const TableDetailDialog: React.FC<TableDetailDialogProps> = ({
   tableNumber, 
   onClose 
 }) => {
-  const { products, currentShift, tables, addToTable, removeFromTable, updateIndividualProduct, completeTableSale, syncProducts } = useStore();
+  const { products, currentShift, tables, addToTable, removeFromTable, updateIndividualProduct, completeTableSale, syncAllStores } = useStore();
   const { decrementStock } = useRecipeStore();
   
+  // Sincronizar todos os stores quando o dialog abrir
+  useEffect(() => {
+    if (isOpen) {
+      console.log('🔄 Sincronizando todos os stores...');
+      syncAllStores();
+    }
+  }, [isOpen, syncAllStores]);
+
   // Verificar se produtos estão carregados
   useEffect(() => {
     if (products.length === 0) {
-      console.log('🔄 Produtos não carregados, sincronizando...');
-      syncProducts();
+      console.log('🔄 Produtos não carregados, aguardando...');
     } else {
       console.log('✅ Produtos carregados:', products.length);
       console.log('📋 Primeiros 5 produtos:', products.slice(0, 5).map(p => ({ id: p.id, name: p.name, code: p.code })));
     }
-  }, [products.length, syncProducts]);
+  }, [products.length]);
 
   // Debug: verificar se o dialog está sendo fechado
   useEffect(() => {
@@ -166,7 +173,8 @@ const TableDetailDialog: React.FC<TableDetailDialogProps> = ({
     for (let i = 0; i < quantity; i++) {
       addToTable(tableNumber, {
         ...product,
-        price: customPrice
+        price: customPrice,
+        modifications: modifications
       }, 1);
     }
     
@@ -214,6 +222,11 @@ const TableDetailDialog: React.FC<TableDetailDialogProps> = ({
       
       // Finalizar mesa (isso já cria a venda e limpa a mesa)
       completeTableSale(tableNumber, paymentMethod);
+      
+      // Sincronizar stores após finalizar venda
+      setTimeout(() => {
+        syncAllStores();
+      }, 100);
       
       // Fechar dialogs
       setShowPaymentDialog(false);

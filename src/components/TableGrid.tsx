@@ -1,182 +1,308 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useTableStore } from '../store/tableStore';
+import React, { useState, useEffect } from 'react';
+import { useStore } from '../store/useStore';
 import { useOrderStore } from '../store/orderStore';
-import { Store, Users, Clock, ShoppingCart } from 'lucide-react';
+import { useTableOperations } from '../hooks/useTableOperations';
+import { formatCurrency } from '../utils/formatters';
 
 interface TableGridProps {
   onTableSelect: (tableNumber: number) => void;
 }
 
 const TableGrid: React.FC<TableGridProps> = ({ onTableSelect }) => {
-  const { tables } = useTableStore();
+  const { currentUser, currentShift, syncAllStores } = useStore();
   const { getTodayOrders, getOrdersByTable } = useOrderStore();
+  const { getTableData } = useTableOperations();
+  
+  // Estados
+  const [searchCode, setSearchCode] = useState('');
+  const [selectedTable, setSelectedTable] = useState<number | null>(null);
+  const [tableProducts, setTableProducts] = useState<any[]>([]);
+  const [tableTotal, setTableTotal] = useState(0);
 
-  // Função para verificar se mesa está ocupada
-  const isTableOccupied = (tableNumber: number): boolean => {
-    const tableOrders = getOrdersByTable(tableNumber);
-    return tableOrders.length > 0;
-  };
-
-  // Função para obter total da mesa
-  const getTableTotal = (tableNumber: number): number => {
-    const tableOrders = getOrdersByTable(tableNumber);
-    return tableOrders.reduce((sum, order) => sum + order.total, 0);
-  };
+  // Sincronizar stores ao carregar
+  useEffect(() => {
+    syncAllStores();
+  }, [syncAllStores]);
 
   // Calcular estatísticas
   const todayOrders = getTodayOrders();
   const occupiedTables = Array.from({ length: 99 }, (_, i) => i + 1)
-    .filter(num => isTableOccupied(num));
+    .filter(num => {
+      const orders = getOrdersByTable(num);
+      return orders.length > 0;
+    });
   
   const freeTables = 99 - occupiedTables.length;
   const occupiedCount = occupiedTables.length;
-  const todayOrdersCount = todayOrders.length;
+  const readyOrders = todayOrders.filter(order => order.status === 'ready').length;
 
-  // Função para obter cor da mesa
-  const getTableColor = (tableNumber: number): string => {
-    return isTableOccupied(tableNumber) 
-      ? 'bg-red-500 hover:bg-red-600 text-white' 
-      : 'bg-green-500 hover:bg-green-600 text-white';
+  // Função para verificar se mesa está ocupada
+  const isTableOccupied = (tableNumber: number): boolean => {
+    const orders = getOrdersByTable(tableNumber);
+    return orders.length > 0;
   };
 
-  // Função para obter cor da sombra
-  const getTableShadow = (tableNumber: number): string => {
-    return isTableOccupied(tableNumber) 
-      ? 'shadow-red-500/25 hover:shadow-red-500/40' 
-      : 'shadow-green-500/25 hover:shadow-green-500/40';
+  // Função para obter total da mesa
+  const getTableTotal = (tableNumber: number): number => {
+    const orders = getOrdersByTable(tableNumber);
+    return orders.reduce((sum, order) => sum + order.total, 0);
   };
+
+  // Função para buscar produto por código
+  const handleSearchProduct = (code: string) => {
+    if (!code.trim()) return;
+    
+    // Aqui seria a lógica de busca de produto
+    console.log('Buscando produto:', code);
+    setSearchCode('');
+  };
+
+  // Função para selecionar mesa
+  const handleTableSelect = (tableNumber: number) => {
+    setSelectedTable(tableNumber);
+    const tableData = getTableData(tableNumber);
+    setTableProducts(tableData.orders);
+    setTableTotal(tableData.total);
+    onTableSelect(tableNumber);
+  };
+
+  // Atalhos de teclado
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignorar se estiver digitando em input
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        return;
+      }
+
+      // F1 - Buscar produtos
+      if (e.key === 'F1') {
+        e.preventDefault();
+        // Abrir dialog de busca de produtos
+        console.log('F1 - Buscar produtos');
+      }
+
+      // F2 - Receber
+      if (e.key === 'F2') {
+        e.preventDefault();
+        if (selectedTable) {
+          console.log('F2 - Receber mesa:', selectedTable);
+        }
+      }
+
+      // F3 - Encerrar/Reabrir
+      if (e.key === 'F3') {
+        e.preventDefault();
+        console.log('F3 - Encerrar/Reabrir');
+      }
+
+      // F5 - Imprimir
+      if (e.key === 'F5') {
+        e.preventDefault();
+        console.log('F5 - Imprimir');
+      }
+
+      // F6 - Histórico
+      if (e.key === 'F6') {
+        e.preventDefault();
+        console.log('F6 - Histórico');
+      }
+
+      // F8 - Delivery
+      if (e.key === 'F8') {
+        e.preventDefault();
+        console.log('F8 - Delivery');
+      }
+
+      // F9 - Comandas
+      if (e.key === 'F9') {
+        e.preventDefault();
+        console.log('F9 - Comandas');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [selectedTable]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-6">
+    <div className="legacy-system h-screen">
       {/* Header */}
-      <Card className="mb-6 shadow-lg">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xl">🍔</span>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">CIA DO LANCHE</h1>
-                <p className="text-sm text-gray-600">Sistema de Mesas</p>
-              </div>
+      <header className="legacy-header">
+        <div>
+          <h1>CIA DO LANCHE</h1>
+          <p className="text-sm">Mesa/Comanda Operador[F1]</p>
+        </div>
+        
+        <div className="text-center">
+          <h2>Protótipo PDV</h2>
+        </div>
+        
+        <div className="text-right">
+          <div className="text-green-600 font-bold">Livres: {freeTables}</div>
+          <div className="text-red-600 font-bold">Ocupadas: {occupiedCount}</div>
+          <div className="text-yellow-600 font-bold">Pedidos Prontos: {readyOrders}</div>
+        </div>
+        
+        <button className="legacy-button legacy-button-red px-8 py-2 text-xl">
+          Sair
+        </button>
+      </header>
+
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
+        {/* Sidebar Esquerda */}
+        <aside className="legacy-sidebar space-y-4 lg:w-80 w-full">
+          {/* Identificação Caixa */}
+          <div className="legacy-caixa">
+            <span className="text-2xl">⚠️</span>
+            <div>
+              <div className="numero">003</div>
+              <div className="label">CAIXA</div>
             </div>
-
-            {/* Estatísticas */}
-            <div className="flex items-center gap-4">
-              <Card className="bg-green-50 border-green-200">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-green-600" />
-                    <div>
-                      <div className="text-lg font-bold text-green-800">Livres</div>
-                      <div className="text-2xl font-bold text-green-600">{freeTables}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-red-50 border-red-200">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-red-600" />
-                    <div>
-                      <div className="text-lg font-bold text-red-800">Ocupadas</div>
-                      <div className="text-2xl font-bold text-red-600">{occupiedCount}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-blue-50 border-blue-200">
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-2">
-                    <ShoppingCart className="w-5 h-5 text-blue-600" />
-                    <div>
-                      <div className="text-lg font-bold text-blue-800">Pedidos Hoje</div>
-                      <div className="text-2xl font-bold text-blue-600">{todayOrdersCount}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Botão Balcão */}
-            <Button
-              onClick={() => onTableSelect(0)}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              <Store className="w-6 h-6 mr-2" />
-              BALCÃO
-            </Button>
           </div>
-        </CardHeader>
-      </Card>
 
-      {/* Grid de Mesas */}
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-center text-xl font-bold text-gray-800">
-            Mesas Disponíveis
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-10 gap-3 max-w-6xl mx-auto">
-            {Array.from({ length: 99 }, (_, i) => i + 1).map((tableNumber) => {
-              const isOccupied = isTableOccupied(tableNumber);
-              const total = getTableTotal(tableNumber);
+          {/* Campo de busca */}
+          <div>
+            <input 
+              type="text"
+              placeholder="🔍 Lançar produto"
+              value={searchCode}
+              onChange={(e) => setSearchCode(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearchProduct(searchCode);
+                }
+              }}
+              className="legacy-input"
+            />
+          </div>
+
+          {/* Tabela de produtos na mesa */}
+          <div className="border-2 border-gray-400 rounded">
+            <table className="legacy-table">
+              <thead>
+                <tr>
+                  <th className="p-1">Cód.</th>
+                  <th className="p-1">Produto</th>
+                  <th className="p-1">Qtde</th>
+                  <th className="p-1">Preço</th>
+                  <th className="p-1">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tableProducts.map((product, index) => (
+                  <tr key={index}>
+                    <td className="p-1">{product.code || ''}</td>
+                    <td className="p-1">{product.name || ''}</td>
+                    <td className="p-1">{product.quantity || 1}</td>
+                    <td className="p-1">{formatCurrency(product.price || 0)}</td>
+                    <td className="p-1">{formatCurrency(product.subtotal || 0)}</td>
+                  </tr>
+                ))}
+                {tableProducts.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="p-4 text-center text-gray-500">
+                      Nenhum produto adicionado
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Total */}
+          <div className="legacy-total">
+            <div>Total Mesa: {formatCurrency(tableTotal)}</div>
+          </div>
+
+          {/* Botões de ação */}
+          <div className="space-y-2">
+            <button className="w-full legacy-button legacy-button-green">
+              F2 - Receber
+            </button>
+            <button className="w-full legacy-button legacy-button-gray">
+              F3 - Encerrar-Reabrir
+            </button>
+            <button className="w-full legacy-button legacy-button-gray">
+              F4 - Cancelar / Transferir
+            </button>
+            <button className="w-full legacy-button legacy-button-gray">
+              F5 - Imprimir
+            </button>
+            <button className="w-full legacy-button legacy-button-gray">
+              F6 - Histórico Pedidos
+            </button>
+            <button className="w-full legacy-button legacy-button-gray">
+              F7 - Utilitários
+            </button>
+            <button className="w-full legacy-button legacy-button-gray">
+              F8 - Delivery
+            </button>
+            <button className="w-full legacy-button legacy-button-gray">
+              F9 - Comandas
+            </button>
+            <button className="w-full legacy-button legacy-button-green">
+              Não impressos
+            </button>
+          </div>
+        </aside>
+
+        {/* Área principal - Grid de mesas */}
+        <main className="flex-1 p-4 overflow-auto">
+          {/* Abas */}
+          <div className="legacy-tabs">
+            <button className="legacy-tab active">
+              Mesas
+            </button>
+            <button className="legacy-tab">
+              Comandas
+            </button>
+          </div>
+
+          {/* Range de mesas */}
+          <div className="flex gap-2 mb-4">
+            <button className="legacy-button legacy-button-gray">
+              0 - 99
+            </button>
+            <button className="legacy-button legacy-button-gray">
+              100 - 199
+            </button>
+          </div>
+
+          {/* Grid de mesas responsivo */}
+          <div className="legacy-mesa-grid">
+            {/* BALCÃO */}
+            <button 
+              onClick={() => handleTableSelect(0)}
+              className={`legacy-mesa-button legacy-mesa-balcao ${
+                selectedTable === 0 ? 'ring-4 ring-blue-500' : ''
+              }`}
+            >
+              <div className="text-lg">BALCAO</div>
+              <div className="text-sm">{formatCurrency(getTableTotal(0))}</div>
+            </button>
+
+            {/* Mesas 01-99 */}
+            {Array.from({ length: 99 }, (_, i) => i + 1).map(num => {
+              const isOccupied = isTableOccupied(num);
+              const total = getTableTotal(num);
               
               return (
                 <button
-                  key={tableNumber}
-                  onClick={() => onTableSelect(tableNumber)}
-                  className={`
-                    aspect-square rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105
-                    ${getTableColor(tableNumber)}
-                    ${getTableShadow(tableNumber)}
-                    shadow-lg hover:shadow-xl
-                    flex flex-col items-center justify-center
-                    border-2 border-white
-                  `}
+                  key={num}
+                  onClick={() => handleTableSelect(num)}
+                  className={`legacy-mesa-button ${
+                    isOccupied ? 'legacy-mesa-occupied' : 'legacy-mesa-available'
+                  } ${selectedTable === num ? 'ring-4 ring-blue-500' : ''}`}
                 >
-                  <div className="text-2xl font-bold">
-                    {tableNumber.toString().padStart(2, '0')}
-                  </div>
-                  {isOccupied && total > 0 && (
-                    <div className="text-xs mt-1 opacity-90">
-                      R$ {total.toFixed(2)}
-                    </div>
-                  )}
+                  <div className="text-lg">{String(num).padStart(2, '0')}</div>
+                  <div className="text-sm">{formatCurrency(total)}</div>
                 </button>
               );
             })}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Legenda */}
-      <Card className="mt-6 shadow-lg">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-green-500 rounded border-2 border-white"></div>
-              <span className="text-sm font-medium text-gray-700">Mesa Livre</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-red-500 rounded border-2 border-white"></div>
-              <span className="text-sm font-medium text-gray-700">Mesa Ocupada</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-orange-500 rounded border-2 border-white"></div>
-              <span className="text-sm font-medium text-gray-700">Balcão</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </main>
+      </div>
     </div>
   );
 };

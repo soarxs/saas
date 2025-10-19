@@ -1,0 +1,555 @@
+/* Sistema Protótipo PDV - Design Moderno e Responsivo */
+
+:root {
+  /* Cores principais */
+  --background-main: #f8fafc;           /* Fundo claro moderno */
+  --header-blue: #1e40af;               /* Azul moderno do cabeçalho */
+  --sidebar-gray: #f1f5f9;              /* Cinza claro da barra lateral */
+  --table-available: #10b981;            /* Verde moderno para mesas livres */
+  --table-occupied: #ef4444;             /* Vermelho moderno para mesas ocupadas */
+  --table-balcao: #f59e0b;              /* Laranja moderno para balcão */
+  --dialog-header: #3b82f6;             /* Azul moderno dos diálogos */
+  --button-green: #10b981;               /* Verde moderno dos botões principais */
+  --button-gray: #6b7280;                /* Cinza moderno dos botões secundários */
+  --text-dark: #1f2937;                  /* Texto escuro moderno */
+  --total-red: #dc2626;                  /* Vermelho moderno para total */
+  --text-red: #dc2626;                   /* Vermelho moderno do texto */
+  --text-blue: #1e40af;                  /* Azul moderno do texto */
+  --input-yellow: #fef3c7;               /* Amarelo claro dos inputs */
+  --zebra-white: #ffffff;                /* Branco zebrado */
+  --zebra-yellow: #fef3c7;               /* Amarelo claro zebrado */
+  --cyan-accent: #06b6d4;                /* Ciano moderno dos acentos */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* Estilos globais para o sistema protótipo */
+.legacy-system {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--background-main);
+  min-height: 100vh;
+}
+
+/* Header do sistema */
+.legacy-header {
+  background: linear-gradient(135deg, var(--header-blue) 0%, #1e3a8a 100%);
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.legacy-header h1 {
+  color: white;
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.legacy-header h2 {
+  color: #dbeafe;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.legacy-header p {
+  color: #e5e7eb;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Sidebar esquerda */
+.legacy-sidebar {
+  width: 20rem;
+  background-color: var(--sidebar-gray);
+  padding: 1.5rem;
+  border-right: 1px solid #e5e7eb;
+  box-shadow: var(--shadow-sm);
+  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+}
+
+/* Identificação do caixa */
+.legacy-caixa {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid #fecaca;
+}
+
+.legacy-caixa .numero {
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.legacy-caixa .label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* Inputs do sistema protótipo */
+.legacy-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  background-color: white;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.legacy-input:focus {
+  outline: none;
+  border-color: var(--header-blue);
+  background-color: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.legacy-input::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Tabelas do sistema protótipo */
+.legacy-table {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.legacy-table th {
+  background: linear-gradient(135deg, var(--header-blue) 0%, #1e3a8a 100%);
+  color: white;
+  padding: 0.75rem 0.5rem;
+  border: none;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.legacy-table td {
+  padding: 0.75rem 0.5rem;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.legacy-table tbody tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.legacy-table tbody tr:nth-child(odd) {
+  background-color: white;
+}
+
+.legacy-table tbody tr:hover {
+  background-color: #f3f4f6;
+  transform: scale(1.01);
+  transition: all 0.2s ease;
+}
+
+/* Botões do sistema protótipo */
+.legacy-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.legacy-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.legacy-button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.legacy-button-green {
+  background: linear-gradient(135deg, var(--button-green) 0%, #059669 100%);
+  color: white;
+}
+
+.legacy-button-green:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.legacy-button-gray {
+  background: linear-gradient(135deg, var(--button-gray) 0%, #4b5563 100%);
+  color: white;
+}
+
+.legacy-button-gray:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+.legacy-button-red {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.legacy-button-red:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.legacy-button-blue {
+  background: linear-gradient(135deg, var(--header-blue) 0%, #1e3a8a 100%);
+  color: white;
+}
+
+.legacy-button-blue:hover {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+}
+
+/* Grid de mesas responsivo */
+.legacy-mesa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+  max-width: 100%;
+}
+
+.legacy-mesa-button {
+  padding: 1.5rem 1rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.legacy-mesa-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.legacy-mesa-button:hover::before {
+  transform: translateX(100%);
+}
+
+.legacy-mesa-button:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.legacy-mesa-button:active {
+  transform: translateY(-2px) scale(1.01);
+}
+
+.legacy-mesa-available {
+  background: linear-gradient(135deg, var(--table-available) 0%, #059669 100%);
+  color: white;
+}
+
+.legacy-mesa-available:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.legacy-mesa-occupied {
+  background: linear-gradient(135deg, var(--table-occupied) 0%, #dc2626 100%);
+  color: white;
+}
+
+.legacy-mesa-occupied:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.legacy-mesa-balcao {
+  background: linear-gradient(135deg, var(--table-balcao) 0%, #d97706 100%);
+  color: white;
+}
+
+.legacy-mesa-balcao:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+/* Total da mesa */
+.legacy-total {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 800;
+  box-shadow: var(--shadow-md);
+  border: 1px solid #fecaca;
+}
+
+/* Abas */
+.legacy-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.legacy-tab {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(135deg, var(--button-gray) 0%, #4b5563 100%);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.legacy-tab:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.legacy-tab.active {
+  background: linear-gradient(135deg, white 0%, #f9fafb 100%);
+  color: var(--text-dark);
+  box-shadow: var(--shadow-md);
+}
+
+/* Dialog header */
+.legacy-dialog-header {
+  background-color: var(--dialog-header);
+  padding: 1rem;
+  margin: -1.5rem -1.5rem 1rem -1.5rem;
+  border-radius: 8px 8px 0 0;
+}
+
+/* Área de acréscimos */
+.legacy-acrescimos-header {
+  background-color: var(--cyan-accent);
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: var(--text-dark);
+}
+
+/* Formas de pagamento */
+.legacy-payment-button {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #000;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.legacy-payment-button:hover {
+  opacity: 0.8;
+}
+
+.legacy-payment-green {
+  background-color: var(--button-green);
+  color: white;
+}
+
+.legacy-payment-gray {
+  background-color: var(--button-gray);
+  color: var(--text-dark);
+}
+
+/* Resumo de pagamento */
+.legacy-payment-summary {
+  background-color: white;
+  padding: 1rem;
+  border: 2px solid #000;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.legacy-payment-summary .total {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+.legacy-payment-summary .falta {
+  color: var(--total-red);
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+/* Responsividade completa */
+@media (max-width: 1400px) {
+  .legacy-mesa-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+}
+
+@media (max-width: 1200px) {
+  .legacy-mesa-grid {
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 0.75rem;
+  }
+  
+  .legacy-sidebar {
+    width: 18rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .legacy-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .legacy-header > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .legacy-mesa-grid {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .legacy-sidebar {
+    width: 16rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .legacy-system {
+    flex-direction: column;
+  }
+  
+  .legacy-sidebar {
+    width: 100%;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .legacy-mesa-grid {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .legacy-mesa-button {
+    min-height: 80px;
+    padding: 1rem 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .legacy-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .legacy-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .legacy-header h2 {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .legacy-mesa-grid {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+  
+  .legacy-mesa-button {
+    min-height: 70px;
+    padding: 0.75rem 0.25rem;
+    font-size: 0.75rem;
+  }
+  
+  .legacy-caixa {
+    padding: 0.75rem;
+  }
+  
+  .legacy-caixa .numero {
+    font-size: 1.5rem;
+  }
+  
+  .legacy-total {
+    padding: 1rem;
+    font-size: 1.125rem;
+  }
+  
+  .legacy-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .legacy-mesa-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+  }
+  
+  .legacy-mesa-button {
+    min-height: 60px;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.7rem;
+  }
+  
+  .legacy-tabs {
+    flex-direction: column;
+  }
+  
+  .legacy-tab {
+    border-radius: 8px;
+    margin-bottom: 0.25rem;
+  }
+}
