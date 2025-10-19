@@ -33,7 +33,7 @@
 
 /* Header do sistema */
 .legacy-header {
-  background: linear-gradient(135deg, var(--header-blue) 0%, #1e3a8a 100%);
+  background: linear-gradient(135deg, #87ceeb 0%, #add8e6 100%);
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -46,7 +46,7 @@
 }
 
 .legacy-header h1 {
-  color: white;
+  color: #dc2626;
   font-size: 1.75rem;
   font-weight: 800;
   margin: 0;
@@ -54,14 +54,14 @@
 }
 
 .legacy-header h2 {
-  color: #dbeafe;
+  color: #1e40af;
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
 }
 
 .legacy-header p {
-  color: #e5e7eb;
+  color: #374151;
   font-size: 0.875rem;
   margin: 0;
 }
@@ -419,6 +419,15 @@
   color: var(--total-red);
   font-size: 1.125rem;
   font-weight: bold;
+}
+
+/* Grid de 20 mesas (5x4) */
+.legacy-mesa-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* Responsividade para grid de 20 mesas (5x4) */
