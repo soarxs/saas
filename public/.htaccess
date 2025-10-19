@@ -1,0 +1,26 @@
+# Configuração de MIME types
+AddType application/javascript .js
+AddType application/javascript .jsx
+AddType application/javascript .ts
+AddType application/javascript .tsx
+AddType text/javascript .js
+AddType text/javascript .jsx
+AddType text/javascript .ts
+AddType text/javascript .tsx
+
+# Desabilitar Service Worker
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+
+# Cache control
+<FilesMatch "\.(js|jsx|ts|tsx)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+</FilesMatch>
+
+
+
+
+

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpeza de Cache - PROTÓTIPO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f0f9ff;
+            border-left: 4px solid #10b981;
+        }
+        .btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Limpeza de Cache</h1>
+        <p>Sistema PDV - PROTÓTIPO</p>
+        
+        <div class="spinner" id="spinner"></div>
+        
+        <div class="status" id="status">
+            <strong>Iniciando limpeza...</strong><br>
+            Removendo Service Workers e cache do navegador
+        </div>
+        
+        <div id="progress"></div>
+        
+        <button class="btn" onclick="limparTudo()" id="btnLimpar">
+            🔄 Limpar Tudo Agora
+        </button>
+        
+        <button class="btn" onclick="irParaSistema()" id="btnSistema" style="display: none;">
+            🚀 Ir para o Sistema
+        </button>
+    </div>
+
+    <script>
+        let statusDiv = document.getElementById('status');
+        let progressDiv = document.getElementById('progress');
+        let spinner = document.getElementById('spinner');
+        let btnLimpar = document.getElementById('btnLimpar');
+        let btnSistema = document.getElementById('btnSistema');
+
+        function atualizarStatus(mensagem, tipo = 'info') {
+            statusDiv.innerHTML = `<strong>${mensagem}</strong>`;
+            console.log('📋', mensagem);
+        }
+
+        function adicionarProgresso(mensagem) {
+            progressDiv.innerHTML += `<div>✅ ${mensagem}</div>`;
+        }
+
+        async function limparTudo() {
+            btnLimpar.style.display = 'none';
+            spinner.style.display = 'block';
+            
+            atualizarStatus('🧹 Iniciando limpeza completa...');
+            
+            // 1. Comunicar com Service Worker para limpar cache
+            if ('serviceWorker' in navigator) {
+                atualizarStatus('📋 Comunicando com Service Worker...');
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    if (registration.active) {
+                        const messageChannel = new MessageChannel();
+                        messageChannel.port1.onmessage = (event) => {
+                            if (event.data.success) {
+                                adicionarProgresso('Cache do Service Worker limpo');
+                            }
+                        };
+                        
+                        registration.active.postMessage(
+                            { type: 'CLEAR_CACHE' },
+                            [messageChannel.port2]
+                        );
+                    }
+                } catch (e) {
+                    adicionarProgresso('Erro ao comunicar com Service Worker');
+                }
+            }
+            
+            // 2. Service Workers
+            if ('serviceWorker' in navigator) {
+                atualizarStatus('📋 Removendo Service Workers...');
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                
+                for (let registration of registrations) {
+                    await registration.unregister();
+                    adicionarProgresso(`Service Worker removido: ${registration.scope}`);
+                }
+            }
+            
+            // 3. Caches
+            if ('caches' in window) {
+                atualizarStatus('📦 Limpando caches...');
+                const cacheNames = await caches.keys();
+                
+                for (let cacheName of cacheNames) {
+                    await caches.delete(cacheName);
+                    adicionarProgresso(`Cache removido: ${cacheName}`);
+                }
+            }
+            
+            // 4. LocalStorage
+            atualizarStatus('💾 Limpando localStorage...');
+            try {
+                localStorage.clear();
+                adicionarProgresso('localStorage limpo');
+            } catch (e) {
+                adicionarProgresso('Erro ao limpar localStorage');
+            }
+            
+            // 5. SessionStorage
+            atualizarStatus('🔒 Limpando sessionStorage...');
+            try {
+                sessionStorage.clear();
+                adicionarProgresso('sessionStorage limpo');
+            } catch (e) {
+                adicionarProgresso('Erro ao limpar sessionStorage');
+            }
+            
+            // 6. IndexedDB (se existir)
+            atualizarStatus('🗄️ Limpando IndexedDB...');
+            try {
+                if ('indexedDB' in window) {
+                    // Lista de bancos de dados conhecidos do sistema
+                    const dbNames = ['pdv-database', 'sales-db', 'products-db'];
+                    for (let dbName of dbNames) {
+                        try {
+                            indexedDB.deleteDatabase(dbName);
+                            adicionarProgresso(`IndexedDB removido: ${dbName}`);
+                        } catch (e) {
+                            // Ignorar erros de bancos que não existem
+                        }
+                    }
+                }
+            } catch (e) {
+                adicionarProgresso('Erro ao limpar IndexedDB');
+            }
+            
+            // 7. Finalizar
+            atualizarStatus('✅ Limpeza concluída!');
+            spinner.style.display = 'none';
+            btnSistema.style.display = 'inline-block';
+            
+            // Auto-redirect após 3 segundos
+            setTimeout(() => {
+                irParaSistema();
+            }, 3000);
+        }
+
+        function irParaSistema() {
+            window.location.href = '/';
+        }
+
+        // Auto-iniciar limpeza
+        setTimeout(() => {
+            limparTudo();
+        }, 1000);
+    </script>
+</body>
+</html>
+
+

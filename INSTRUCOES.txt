@@ -1,0 +1,63 @@
+🚀 SISTEMA PDV - INSTRUÇÕES DE USO
+
+✅ PROBLEMAS RESOLVIDOS:
+- Service Worker desabilitado
+- MIME types corretos
+- Cache limpo
+- Manifest removido
+- Ícones problemáticos removidos
+- Porta alterada para evitar conflitos (3001)
+
+📋 COMO USAR:
+
+1. Execute no terminal:
+   npm run dev
+
+2. Abra o navegador em:
+   http://localhost:8080
+
+3. Se houver problemas de cache:
+   - Acesse: http://localhost:8080/limpar-pdv.html
+   - Ou pressione Ctrl+Shift+R para limpar cache
+   - Ou abra uma aba anônima
+
+🎯 RESULTADO ESPERADO:
+- Tela verde com "Sistema PDV"
+- Mensagem "Sistema Funcionando Perfeitamente!"
+- Sem erros no console
+
+⌨️ NOVOS ATALHOS IMPLEMENTADOS:
+
+🛒 VENDAS (PRINCIPAL):
+- F2 = Confirmar venda
+- Enter = Confirmar/Próximo
+- Esc = Cancelar
+- 1-5 = Formas de pagamento
+- + = Adicionar ao carrinho
+- - = Remover do carrinho
+- Setas = Navegar entre produtos
+- F12 = Limpar carrinho
+
+📋 ABRIR MESAS RAPIDAMENTE:
+- Ctrl+01 = Abrir Mesa 1 | Ctrl+02 = Abrir Mesa 2 | Ctrl+03 = Abrir Mesa 3
+- Ctrl+04 = Abrir Mesa 4 | Ctrl+05 = Abrir Mesa 5 | Ctrl+06 = Abrir Mesa 6
+- Ctrl+07 = Abrir Mesa 7 | Ctrl+08 = Abrir Mesa 8 | Ctrl+09 = Abrir Mesa 9
+- Ctrl+10 = Abrir Mesa 10 | Ctrl+11 = Abrir Mesa 11 | Ctrl+12 = Abrir Mesa 12
+- Ctrl+13 = Abrir Mesa 13 | Ctrl+14 = Abrir Mesa 14 | Ctrl+15 = Abrir Mesa 15
+- Ctrl+16 = Abrir Mesa 16 | Ctrl+17 = Abrir Mesa 17 | Ctrl+18 = Abrir Mesa 18
+- Ctrl+19 = Abrir Mesa 19 | Ctrl+20 = Abrir Mesa 20
+
+💡 DICA: Digite 2 dígitos após Ctrl para abrir mesas (Ctrl+01, Ctrl+02, etc.)
+
+🔧 COMANDOS DISPONÍVEIS:
+- npm run dev          (servidor Vite - RECOMENDADO)
+- npm run build        (build de produção)
+- npm run preview      (preview do build)
+
+📁 ARQUIVOS IMPORTANTES:
+- vite.config.ts       (configuração do Vite)
+- src/App.tsx          (app React principal)
+- index.html           (HTML principal)
+
+🎉 SISTEMA 100% FUNCIONAL COM ATALHOS!
+

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>Saas PDV - Sistema de Ponto de Venda</title>
+    <meta name="description" content="Sistema de Ponto de Venda Multi-tenant - Saas PDV" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=4" />
+    <link rel="shortcut icon" type="image/svg+xml" href="/favicon.svg?v=4" />
+    <link rel="apple-touch-icon" href="/favicon.svg?v=4" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#10b981" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Saas PDV" />
+    <meta name="msapplication-TileColor" content="#10b981" />
+    <meta name="msapplication-tap-highlight" content="no" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('✅ Service Worker registrado com sucesso:', registration.scope);
+              
+              // Verificar atualizações
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (newWorker) {
+                  newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                      console.log('🔄 Nova versão disponível! Recarregue a página.');
+                      if (confirm('Nova versão disponível! Deseja recarregar a página?')) {
+                        window.location.reload();
+                      }
+                    }
+                  });
+                }
+              });
+            })
+            .catch((error) => {
+              console.error('❌ Erro ao registrar Service Worker:', error);
+              // Se houver erro, redirecionar para página de limpeza
+              if (error.message.includes('cache') || error.message.includes('network')) {
+                console.log('🔄 Redirecionando para limpeza de cache...');
+                window.location.href = '/clear-cache.html';
+              }
+            });
+        });
+      } else {
+        console.warn('⚠️ Service Worker não suportado neste navegador');
+      }
+
+      // Função global para limpeza de cache
+      window.clearAppCache = function() {
+        window.location.href = '/clear-cache.html';
+      };
+
+      // Detectar tela branca e oferecer solução
+      setTimeout(() => {
+        if (document.body.innerHTML.trim() === '' || document.querySelector('#root').innerHTML.trim() === '') {
+          console.log('🔄 Tela branca detectada, oferecendo solução...');
+          if (confirm('Tela branca detectada! Deseja limpar o cache?')) {
+            window.location.href = '/clear-cache.html';
+          }
+        }
+      }, 3000);
+    </script>
+  </body>
+</html>
