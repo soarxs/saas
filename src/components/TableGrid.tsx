@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import { useOrderStore } from '../store/orderStore';
 import { useTableOperations } from '../hooks/useTableOperations';
 import { formatCurrency } from '../utils/formatters';
+import UtilitiesDialog from './UtilitiesDialog';
 
 interface TableGridProps {
   onTableSelect: (tableNumber: number) => void;
@@ -18,6 +19,7 @@ const TableGrid: React.FC<TableGridProps> = ({ onTableSelect }) => {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [tableProducts, setTableProducts] = useState<any[]>([]);
   const [tableTotal, setTableTotal] = useState(0);
+  const [showUtilities, setShowUtilities] = useState(false);
 
   // Sincronizar stores ao carregar
   useEffect(() => {
@@ -106,6 +108,12 @@ const TableGrid: React.FC<TableGridProps> = ({ onTableSelect }) => {
       if (e.key === 'F6') {
         e.preventDefault();
         console.log('F6 - Histórico');
+      }
+
+      // F7 - Utilitários
+      if (e.key === 'F7') {
+        e.preventDefault();
+        setShowUtilities(true);
       }
 
       // F8 - Delivery
@@ -232,7 +240,10 @@ const TableGrid: React.FC<TableGridProps> = ({ onTableSelect }) => {
             <button className="w-full legacy-button legacy-button-gray">
               F6 - Histórico Pedidos
             </button>
-            <button className="w-full legacy-button legacy-button-gray">
+            <button 
+              onClick={() => setShowUtilities(true)}
+              className="w-full legacy-button legacy-button-gray"
+            >
               F7 - Utilitários
             </button>
             <button className="w-full legacy-button legacy-button-gray">
@@ -303,6 +314,12 @@ const TableGrid: React.FC<TableGridProps> = ({ onTableSelect }) => {
           </div>
         </main>
       </div>
+
+      {/* Dialog de Utilitários */}
+      <UtilitiesDialog
+        isOpen={showUtilities}
+        onClose={() => setShowUtilities(false)}
+      />
     </div>
   );
 };
