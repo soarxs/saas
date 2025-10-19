@@ -1,6 +1,4 @@
 // Configuração central da aplicação
-import { environmentConfig } from './environment';
-
 export interface AppConfig {
   name: string;
   shortName: string;
@@ -26,29 +24,29 @@ export interface AppConfig {
   };
 }
 
-// Configuração da aplicação baseada em variáveis de ambiente
+// Configuração da aplicação
 export const appConfig: AppConfig = {
-  name: environmentConfig.appName,
-  shortName: environmentConfig.appShortName,
-  description: environmentConfig.appDescription,
-  version: environmentConfig.appVersion,
+  name: 'Protótipo PDV',
+  shortName: 'PDV',
+  description: 'Sistema de Ponto de Venda para Lanchonetes',
+  version: '1.0.0',
   author: 'Saas PDV Team',
   support: {
-    email: environmentConfig.supportEmail,
-    phone: environmentConfig.supportPhone
+    email: 'suporte@pdv.com',
+    phone: '(11) 99999-9999'
   },
   branding: {
-    primaryColor: environmentConfig.primaryColor,
-    secondaryColor: environmentConfig.secondaryColor,
+    primaryColor: '#1e40af',
+    secondaryColor: '#10b981',
     logo: '/favicon.svg',
     favicon: '/favicon.svg'
   },
   features: {
-    multiTenant: environmentConfig.multiTenant,
-    offlineMode: environmentConfig.offlineMode,
-    notifications: environmentConfig.notifications,
-    printing: environmentConfig.printing,
-    reports: environmentConfig.reports
+    multiTenant: false,
+    offlineMode: true,
+    notifications: true,
+    printing: true,
+    reports: true
   }
 };
 
