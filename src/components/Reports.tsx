@@ -4,8 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSalesStore } from '../store/salesStore';
 import { useStore } from '../store/useStore';
-import { useBackup } from '../hooks/useBackup';
-import AdvancedReports from './AdvancedReports';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { CalendarDays, DollarSign, ShoppingBag, TrendingUp, Download, Upload, Database, BarChart3 } from 'lucide-react';
 import { format, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
@@ -17,9 +15,7 @@ const Reports = () => {
   const { sales } = useSalesStore();
   const { currentShift } = useStore();
   const [reportType, setReportType] = useState('current-shift');
-  const { createManualBackup, exportBackup, importBackup, getAvailableBackups } = useBackup();
   const [showBackupSection, setShowBackupSection] = useState(false);
-  const [showAdvancedReports, setShowAdvancedReports] = useState(false);
 
   const getSalesForDate = (date: Date) => {
     const start = startOfDay(date);
@@ -113,19 +109,12 @@ const Reports = () => {
     parseInt(a.hour) - parseInt(b.hour)
   );
 
-  if (showAdvancedReports) {
-    return <AdvancedReports onBack={() => setShowAdvancedReports(false)} />;
-  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Relatórios</h2>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowAdvancedReports(true)}>
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Relatórios Avançados
-          </Button>
           <Button variant="outline" onClick={() => setShowBackupSection(!showBackupSection)}>
             <Database className="w-4 h-4 mr-2" />
             Backup
@@ -289,26 +278,19 @@ const Reports = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2">
-              <Button onClick={createManualBackup}>
+              <Button onClick={() => toast.info('Funcionalidade em desenvolvimento')}>
                 <Database className="w-4 h-4 mr-2" />
                 Criar Backup
               </Button>
-              <Button variant="outline" onClick={exportBackup}>
+              <Button variant="outline" onClick={() => toast.info('Funcionalidade em desenvolvimento')}>
                 <Download className="w-4 h-4 mr-2" />
                 Exportar Dados
               </Button>
-              <Button variant="outline" onClick={() => document.getElementById('import-backup')?.click()}>
+              <Button variant="outline" onClick={() => toast.info('Funcionalidade em desenvolvimento')}>
                 <Upload className="w-4 h-4 mr-2" />
                 Importar Dados
               </Button>
             </div>
-            <input
-              id="import-backup"
-              type="file"
-              accept=".json"
-              onChange={importBackup}
-              className="hidden"
-            />
           </CardContent>
         </Card>
       )}

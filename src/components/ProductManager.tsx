@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { useStore } from '../store/useStore';
 import { useProductStore } from '../store/productStore';
 import { Product, ProductCategory } from '../types';
-import { useProductSearch } from '../hooks/useProductSearch';
 import { Plus, Edit, Trash2, Package, Search, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -37,7 +36,12 @@ const ProductManager = () => {
     available: true, description: '', currentStock: '', minStock: '', maxStock: ''
   });
 
-  const filteredProducts = useProductSearch({ products, searchTerm, selectedCategory });
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.code.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
   const lowStockProducts = getLowStockProducts();
 
   const resetForm = () => {

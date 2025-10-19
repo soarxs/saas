@@ -59,12 +59,6 @@ const ProfessionalSidebar = ({
       icon: Receipt,
       description: 'Histórico de vendas'
     },
-    { 
-      id: 'delivery', 
-      label: 'Entregas', 
-      icon: Truck,
-      description: 'Gestão de entregas'
-    },
     ...(currentUser?.role === 'admin' ? [
       { 
         id: 'products', 
@@ -78,19 +72,7 @@ const ProfessionalSidebar = ({
         icon: BarChart3,
         description: 'Análises e relatórios'
       },
-      { 
-        id: 'users', 
-        label: 'Usuários', 
-        icon: Users,
-        description: 'Gestão de usuários'
-      },
     ] : []),
-    { 
-      id: 'shift-history', 
-      label: 'Histórico', 
-      icon: History,
-      description: 'Histórico de turnos'
-    },
     { 
       id: 'shift', 
       label: 'Turno', 

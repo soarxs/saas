@@ -6,22 +6,11 @@ import ShiftManager from '../components/ShiftManager';
 import TableManager from '../components/TableManager';
 import ProductManager from '../components/ProductManager';
 import Reports from '../components/Reports';
-import ShiftHistory from '../components/ShiftHistory';
 import SalesView from '../components/SalesView';
-import DeliveryView from '../components/DeliveryView';
-import UserManager from '../components/UserManager';
-import IngredientManager from '../components/IngredientManager';
-import PromotionManager from '../components/PromotionManager';
-import PrinterManager from '../components/PrinterManager';
-import NotificationSettings from '../components/NotificationSettings';
 import ProfessionalHeader from '../components/ProfessionalHeader';
 import ProfessionalSidebar from '../components/ProfessionalSidebar';
 import ProfessionalDashboard from '../components/ProfessionalDashboard';
 import { useKeyboardShortcuts, useShowShortcuts } from '../hooks/useKeyboardShortcuts';
-import { useTableNavigation } from '../hooks/useTableNavigation';
-import { useBackup } from '../hooks/useBackup';
-import { useOffline } from '../hooks/useOffline';
-import ConnectionStatus from '../components/ConnectionStatus';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -79,14 +68,9 @@ const Index = () => {
     }
   };
 
-  // Sistema de navegação de mesas global
-  const { currentBuffer, isWaitingForDigit } = useTableNavigation({
-    onNavigateToTable: handleNavigateToTable,
-    maxTables: 20,
-    enabled: !!currentUser, // Só ativar se usuário estiver logado
-    allowedViews: ['sales', 'tables'], // Apenas nestas views
-    currentView: currentView
-  });
+  // Sistema de navegação de mesas global (simplificado)
+  const currentBuffer = '';
+  const isWaitingForDigit = false;
 
   // Configurar atalhos de teclado
   useKeyboardShortcuts({
@@ -121,24 +105,10 @@ const Index = () => {
         return <TableManager sidebarOpen={sidebarOpen} />;
       case 'sales-view':
         return <SalesView />;
-      case 'delivery':
-        return <DeliveryView />;
       case 'products':
         return <ProductManager />;
       case 'reports':
         return <Reports />;
-      case 'users':
-        return <UserManager />;
-      case 'ingredients':
-        return <IngredientManager />;
-      case 'promotions':
-        return <PromotionManager />;
-      case 'printers':
-        return <PrinterManager />;
-      case 'notifications':
-        return <NotificationSettings />;
-      case 'shift-history':
-        return <ShiftHistory />;
       case 'shift':
         return <ShiftManager />;
       default:
