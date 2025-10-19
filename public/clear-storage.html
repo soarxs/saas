@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpar Cache - Saas PDV</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+        .success {
+            background: #4caf50;
+        }
+        .success:hover {
+            background: #45a049;
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Limpeza de Cache</h1>
+        <p>Use esta página para limpar todos os dados antigos do sistema</p>
+        
+        <div class="info">
+            <strong>⚠️ ATENÇÃO:</strong> Isso irá remover todos os dados salvos localmente, incluindo:
+            <br>• Produtos antigos
+            <br>• Vendas antigas
+            <br>• Configurações antigas
+            <br>• Cache do navegador
+        </div>
+        
+        <button onclick="clearAllData()">🗑️ Limpar Tudo</button>
+        <button onclick="clearOnlyCache()" class="success">🔄 Limpar Apenas Cache</button>
+        <button onclick="goToApp()">🏠 Ir para o App</button>
+        
+        <div id="result" style="margin-top: 20px; font-weight: bold;"></div>
+    </div>
+
+    <script>
+        function clearAllData() {
+            try {
+                // Limpar localStorage
+                localStorage.clear();
+                
+                // Limpar sessionStorage
+                sessionStorage.clear();
+                
+                // Limpar IndexedDB
+                if ('indexedDB' in window) {
+                    indexedDB.databases().then(databases => {
+                        databases.forEach(db => {
+                            indexedDB.deleteDatabase(db.name);
+                        });
+                    });
+                }
+                
+                // Limpar cache do service worker
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        registrations.forEach(registration => {
+                            registration.unregister();
+                        });
+                    });
+                }
+                
+                document.getElementById('result').innerHTML = '✅ Todos os dados foram limpos com sucesso!';
+                document.getElementById('result').style.color = '#4caf50';
+                
+            } catch (error) {
+                document.getElementById('result').innerHTML = '❌ Erro ao limpar dados: ' + error.message;
+                document.getElementById('result').style.color = '#ff6b6b';
+            }
+        }
+        
+        function clearOnlyCache() {
+            try {
+                // Limpar apenas caches específicos do sistema
+                const keysToRemove = [
+                    'product-store',
+                    'recipe-storage',
+                    'order-storage',
+                    'ingredient-storage',
+                    'table-storage',
+                    'sales-storage',
+                    'auth-storage',
+                    'shift-storage'
+                ];
+                
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                document.getElementById('result').innerHTML = '✅ Cache do sistema limpo com sucesso!';
+                document.getElementById('result').style.color = '#4caf50';
+                
+            } catch (error) {
+                document.getElementById('result').innerHTML = '❌ Erro ao limpar cache: ' + error.message;
+                document.getElementById('result').style.color = '#ff6b6b';
+            }
+        }
+        
+        function goToApp() {
+            window.location.href = '/';
+        }
+        
+        // Mostrar informações do localStorage atual
+        window.onload = function() {
+            const info = document.createElement('div');
+            info.className = 'info';
+            info.innerHTML = `
+                <strong>Dados atuais no localStorage:</strong><br>
+                ${Object.keys(localStorage).length} itens salvos
+            `;
+            document.querySelector('.container').appendChild(info);
+        };
+    </script>
+</body>
+</html>

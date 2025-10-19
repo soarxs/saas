@@ -1,14 +1,17 @@
 import { useStore } from '../store/useStore';
 import { useSalesStore } from '../store/salesStore';
+import { useRecipeStore } from '../store/recipeStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import OrderStatusWidget from './OrderStatusWidget';
 import { 
   TrendingUp, 
   ShoppingCart, 
   DollarSign, 
   Clock,
   Package,
-  Activity
+  Activity,
+  AlertTriangle
 } from 'lucide-react';
 
 interface ProfessionalDashboardProps {
@@ -18,6 +21,7 @@ interface ProfessionalDashboardProps {
 const ProfessionalDashboard = ({ onNavigate }: ProfessionalDashboardProps) => {
   const { currentShift, products, getLowStockProducts } = useStore();
   const { sales } = useSalesStore();
+  const { getLowStockIngredients } = useRecipeStore();
 
   // Calcular métricas
   const todaySales = sales.filter(sale => {
@@ -43,9 +47,36 @@ const ProfessionalDashboard = ({ onNavigate }: ProfessionalDashboardProps) => {
 
   // Produtos com estoque baixo
   const lowStockProducts = getLowStockProducts();
+  const lowStockIngredients = getLowStockIngredients();
 
   return (
     <div className="space-y-6">
+      {/* Widget de Status de Pedidos */}
+      <OrderStatusWidget 
+        onViewKitchen={() => onNavigate?.('kitchen')}
+        onViewDeliveries={() => onNavigate?.('deliveries')}
+      />
+
+      {/* Alertas de Estoque Baixo */}
+      {lowStockIngredients.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-5 w-5 text-red-600" />
+            <h3 className="text-lg font-semibold text-red-800">⚠️ Estoque Baixo</h3>
+          </div>
+          <div className="text-sm text-red-700">
+            <p className="mb-2">Os seguintes ingredientes estão com estoque baixo:</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+              {lowStockIngredients.map(ing => (
+                <div key={ing.id} className="bg-red-100 rounded px-2 py-1 text-xs">
+                  <span className="font-semibold">{ing.name}:</span> {ing.currentStock} {ing.unit}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Métricas Principais */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all duration-300 hover:scale-105">

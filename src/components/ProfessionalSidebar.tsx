@@ -15,7 +15,9 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  ChefHat,
+  Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -24,13 +26,15 @@ interface ProfessionalSidebarProps {
   onViewChange: (view: string) => void;
   isCollapsed?: boolean; // Opcional, não será usado para auto-collapse
   onToggle?: () => void; // Opcional, apenas para mobile
+  onNewOrder?: () => void; // Função para abrir novo pedido
 }
 
 const ProfessionalSidebar = ({ 
   currentView, 
   onViewChange, 
   isCollapsed = false, // Sempre expandido por padrão
-  onToggle
+  onToggle,
+  onNewOrder
 }: ProfessionalSidebarProps) => {
   const { currentUser, currentShift, setCurrentUser } = useStore();
 
@@ -46,6 +50,18 @@ const ProfessionalSidebar = ({
       label: 'Mesas', 
       icon: ShoppingCart,
       description: 'Gerenciar mesas e pedidos'
+    },
+    { 
+      id: 'deliveries', 
+      label: 'Delivery', 
+      icon: Truck,
+      description: 'Gerenciar entregas'
+    },
+    { 
+      id: 'kitchen', 
+      label: 'Cozinha', 
+      icon: ChefHat,
+      description: 'Display da cozinha'
     },
     { 
       id: 'dashboard', 
@@ -107,6 +123,19 @@ const ProfessionalSidebar = ({
           </div>
         </div>
         
+        {/* Botão Novo Pedido */}
+        {onNewOrder && (
+          <div className="p-4 border-b border-gray-200">
+            <Button
+              onClick={onNewOrder}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Novo Pedido
+            </Button>
+          </div>
+        )}
+
         {/* Navigation */}
         <nav className="flex-1 p-4 overflow-y-auto">
           <div className="space-y-2">

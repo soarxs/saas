@@ -10,6 +10,11 @@ import SalesView from '../components/SalesView';
 import ProfessionalHeader from '../components/ProfessionalHeader';
 import ProfessionalSidebar from '../components/ProfessionalSidebar';
 import ProfessionalDashboard from '../components/ProfessionalDashboard';
+import NewOrderDialog from '../components/NewOrderDialog';
+import KitchenDisplay from '../components/KitchenDisplay';
+import DeliveryManager from '../components/DeliveryManager';
+import TableGrid from '../components/TableGrid';
+import TableDetailDialog from '../components/TableDetailDialog';
 import { useKeyboardShortcuts, useShowShortcuts } from '../hooks/useKeyboardShortcuts';
 import { toast } from 'sonner';
 
@@ -17,18 +22,14 @@ const Index = () => {
   const { currentUser, currentShift } = useStore();
   const [currentView, setCurrentView] = useState('sales');
   const [sidebarOpen, setSidebarOpen] = useState(true); // Sempre aberto por padrão
+  const [newOrderDialogOpen, setNewOrderDialogOpen] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const showShortcuts = useShowShortcuts();
-  
-  // Inicializar sistema de backup automático
-  useBackup();
-  
-  // Inicializar sistema offline
-  useOffline();
 
   // Funções para atalhos de teclado
   const handleNewSale = () => {
-    setCurrentView('sales');
-    toast.success('Nova venda iniciada');
+    setNewOrderDialogOpen(true);
+    toast.success('Novo pedido iniciado');
   };
 
   const handlePrint = () => {
@@ -52,6 +53,10 @@ const Index = () => {
   // Função para navegar (sem fechar sidebar automaticamente)
   const handleNavigate = (view: string) => {
     setCurrentView(view);
+    // Reset selectedTable quando navegar para sales
+    if (view === 'sales') {
+      setSelectedTable(null);
+    }
     // Removido o auto-collapse do sidebar
   };
 
@@ -88,7 +93,7 @@ const Index = () => {
       toast.info('❌ Ação cancelada');
     },
     enabled: !!currentUser, // Só ativar se usuário estiver logado
-    allowedViews: ['sales', 'tables', 'dashboard', 'deliveries', 'shifts'], // Views onde atalhos gerais funcionam
+    allowedViews: ['sales', 'tables', 'dashboard', 'deliveries', 'shifts', 'kitchen', 'orders'], // Views onde atalhos gerais funcionam
     currentView: currentView
   });
 
@@ -102,7 +107,18 @@ const Index = () => {
       case 'dashboard':
         return <ProfessionalDashboard onNavigate={handleNavigate} />;
       case 'sales':
-        return <TableManager sidebarOpen={sidebarOpen} />;
+        // Se nenhuma mesa selecionada, mostrar grid
+        if (selectedTable === null) {
+          return <TableGrid onTableSelect={setSelectedTable} />;
+        }
+        // Se mesa selecionada, mostrar dialog da mesa
+        return (
+          <TableDetailDialog
+            isOpen={true}
+            tableNumber={selectedTable}
+            onClose={() => setSelectedTable(null)}
+          />
+        );
       case 'sales-view':
         return <SalesView />;
       case 'products':
@@ -111,6 +127,10 @@ const Index = () => {
         return <Reports />;
       case 'shift':
         return <ShiftManager />;
+      case 'kitchen':
+        return <KitchenDisplay />;
+      case 'deliveries':
+        return <DeliveryManager />;
       default:
         return <ProfessionalDashboard />;
     }
@@ -127,6 +147,7 @@ const Index = () => {
           currentView={currentView}
           onViewChange={handleNavigate}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
+          onNewOrder={() => setNewOrderDialogOpen(true)}
         />
 
         {/* Conteúdo Principal */}
@@ -137,8 +158,11 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Status de Conexão */}
-      <ConnectionStatus />
+      {/* Dialog de Novo Pedido */}
+      <NewOrderDialog 
+        isOpen={newOrderDialogOpen} 
+        onClose={() => setNewOrderDialogOpen(false)} 
+      />
     </div>
   );
 };
