@@ -11,6 +11,8 @@ import { CalendarDays, DollarSign, ShoppingBag, TrendingUp, Download, Upload, Da
 import { format, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+const CHART_COLORS = ['#FF6B35', '#F7931E', '#FFD700', '#32CD32', '#1E90FF'];
+
 const Reports = () => {
   const { sales } = useSalesStore();
   const { currentShift } = useStore();
@@ -19,45 +21,37 @@ const Reports = () => {
   const [showBackupSection, setShowBackupSection] = useState(false);
   const [showAdvancedReports, setShowAdvancedReports] = useState(false);
 
-  // Helper function to get sales for a specific date
   const getSalesForDate = (date: Date) => {
     const start = startOfDay(date);
     const end = endOfDay(date);
-    return sales.filter(sale => 
-      isWithinInterval(new Date(sale.createdAt), { start, end })
-    );
+    return sales.filter(sale => isWithinInterval(new Date(sale.createdAt), { start, end }));
   };
 
-  // Current shift data
   const getCurrentShiftSales = () => {
     if (!currentShift?.isActive) return [];
     return sales.filter(sale => sale.shiftId === currentShift.id);
   };
 
-  const currentShiftSales = getCurrentShiftSales();
-  const currentShiftTotal = currentShiftSales.reduce((sum, sale) => sum + sale.total, 0);
-  const currentShiftItems = currentShiftSales.reduce((sum, sale) => 
-    sum + sale.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0
-  );
-
-  // Today's data
-  const todaySales = getSalesForDate(new Date());
-  const todayTotal = todaySales.reduce((sum, sale) => sum + sale.total, 0);
-  const todayItems = todaySales.reduce((sum, sale) => 
-    sum + sale.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0
-  );
-
-  // Payment breakdown for current report
   const getReportData = () => {
     switch (reportType) {
-      case 'current-shift':
-        return currentShiftSales;
-      case 'today':
-        return todaySales;
-      case 'all-time':
-        return sales;
-      default:
-        return currentShiftSales;
+      case 'current-shift': return getCurrentShiftSales();
+      case 'today': return getSalesForDate(new Date());
+      case 'yesterday': return getSalesForDate(new Date(Date.now() - 86400000));
+      case 'this-week': return sales.filter(sale => {
+        const saleDate = new Date(sale.createdAt);
+        const weekStart = new Date();
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+        weekStart.setHours(0, 0, 0, 0);
+        return saleDate >= weekStart;
+      });
+      case 'this-month': return sales.filter(sale => {
+        const saleDate = new Date(sale.createdAt);
+        const monthStart = new Date();
+        monthStart.setDate(1);
+        monthStart.setHours(0, 0, 0, 0);
+        return saleDate >= monthStart;
+      });
+      default: return sales;
     }
   };
 
@@ -71,18 +65,18 @@ const Reports = () => {
     return salesData.reduce((breakdown, sale) => {
       breakdown[sale.paymentMethod] += sale.total;
       return breakdown;
-    }, {
-      dinheiro: 0,
-      debito: 0,
-      credito: 0,
-      pix: 0,
-      cortesia: 0,
-    });
+    }, { dinheiro: 0, debito: 0, credito: 0, pix: 0, cortesia: 0 });
   };
 
   const paymentBreakdown = getPaymentBreakdown(reportSales);
+  const paymentData = Object.entries(paymentBreakdown)
+    .map(([method, amount]) => ({
+      name: method.charAt(0).toUpperCase() + method.slice(1),
+      value: Number(amount),
+      percentage: reportTotal > 0 ? ((Number(amount) / reportTotal) * 100) : 0
+    }))
+    .filter(item => item.value > 0);
 
-  // Top products data
   const productSales = reportSales.reduce((acc, sale) => {
     sale.items.forEach(item => {
       if (acc[item.productName]) {
@@ -103,14 +97,6 @@ const Reports = () => {
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 5);
 
-  // Payment method data for charts
-  const paymentData = Object.entries(paymentBreakdown).map(([method, amount]) => ({
-    name: method.charAt(0).toUpperCase() + method.slice(1),
-    value: Number(amount),
-    percentage: reportTotal > 0 ? ((Number(amount) / reportTotal) * 100) : 0
-  })).filter(item => item.value > 0);
-
-  // Sales by hour data
   const salesByHour = reportSales.reduce((acc, sale) => {
     const hour = new Date(sale.createdAt).getHours();
     const hourKey = `${hour}:00`;
@@ -127,69 +113,57 @@ const Reports = () => {
     parseInt(a.hour) - parseInt(b.hour)
   );
 
-  const CHART_COLORS = ['#FF6B35', '#F7931E', '#FFD700', '#32CD32', '#1E90FF'];
-
-  const getReportTitle = () => {
-    switch (reportType) {
-      case 'current-shift':
-        return 'Turno Atual';
-      case 'today':
-        return 'Hoje';
-      case 'all-time':
-        return 'Todos os Períodos';
-      default:
-        return 'Relatório';
-    }
-  };
-
-  // Debug apenas se necessário
-  if (process.env.NODE_ENV === 'development' && sales.length === 0) {
-    console.log('Reports - Nenhuma venda encontrada');
-  }
-
-  // Se relatórios avançados estiverem ativos, mostrar apenas eles
   if (showAdvancedReports) {
     return <AdvancedReports onBack={() => setShowAdvancedReports(false)} />;
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Relatórios</h1>
-          <p className="text-muted-foreground">Análise de vendas e desempenho</p>
-        </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Relatórios</h2>
         <div className="flex gap-2">
-          <Button
-            onClick={() => setShowAdvancedReports(true)}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <BarChart3 className="w-4 h-4" />
+          <Button variant="outline" onClick={() => setShowAdvancedReports(true)}>
+            <BarChart3 className="w-4 h-4 mr-2" />
             Relatórios Avançados
           </Button>
+          <Button variant="outline" onClick={() => setShowBackupSection(!showBackupSection)}>
+            <Database className="w-4 h-4 mr-2" />
+            Backup
+          </Button>
+        </div>
+      </div>
+
+      {/* Seletor de período */}
+      <Card>
+        <CardContent className="pt-6">
           <Select value={reportType} onValueChange={setReportType}>
-            <SelectTrigger className="w-48">
-              <SelectValue />
+            <SelectTrigger className="w-64">
+              <SelectValue placeholder="Selecione o período" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="current-shift">Turno Atual</SelectItem>
               <SelectItem value="today">Hoje</SelectItem>
-              <SelectItem value="all-time">Todos os Períodos</SelectItem>
+              <SelectItem value="yesterday">Ontem</SelectItem>
+              <SelectItem value="this-week">Esta Semana</SelectItem>
+              <SelectItem value="this-month">Este Mês</SelectItem>
+              <SelectItem value="all">Todos os Períodos</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Cards de resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Vendido</CardTitle>
+            <CardTitle className="text-sm font-medium">Total de Vendas</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">R$ {reportTotal.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">
+              {reportSales.length} vendas realizadas
+            </p>
           </CardContent>
         </Card>
 
@@ -200,232 +174,144 @@ const Reports = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{reportItems}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vendas</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{reportSales.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Total de produtos vendidos
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               R$ {reportSales.length > 0 ? (reportTotal / reportSales.length).toFixed(2) : '0.00'}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Valor médio por venda
+            </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Payment Methods Chart */}
+        {/* Vendas por hora */}
         <Card>
           <CardHeader>
-            <CardTitle>Formas de Pagamento - {getReportTitle()}</CardTitle>
+            <CardTitle>Vendas por Hora</CardTitle>
+            <CardDescription>Distribuição das vendas ao longo do dia</CardDescription>
           </CardHeader>
           <CardContent>
-            {paymentData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={paymentData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={120}
-                    paddingAngle={5}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: R$ ${Number(value).toFixed(2)}`}
-                  >
-                    {paymentData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value: any) => [`R$ ${Number(value).toFixed(2)}`, 'Valor']} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-                Nenhuma venda encontrada
-              </div>
-            )}
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={hourlyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="hour" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`R$ ${Number(value).toFixed(2)}`, 'Total']} />
+                <Bar dataKey="total" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Top Products */}
+        {/* Formas de pagamento */}
         <Card>
           <CardHeader>
-            <CardTitle>Produtos Mais Vendidos - {getReportTitle()}</CardTitle>
+            <CardTitle>Formas de Pagamento</CardTitle>
+            <CardDescription>Distribuição por método de pagamento</CardDescription>
           </CardHeader>
           <CardContent>
-            {topProducts.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={topProducts}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value: any) => [Number(value), 'Quantidade']} />
-                  <Bar dataKey="quantity" fill="#FF6B35" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-                Nenhuma venda encontrada
-              </div>
-            )}
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={paymentData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percentage }) => `${name} ${percentage.toFixed(1)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {paymentData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [`R$ ${Number(value).toFixed(2)}`, 'Valor']} />
+              </PieChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </div>
 
-      {/* Sales by Hour */}
-      {reportType === 'today' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Vendas por Hora - Hoje</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {hourlyData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={hourlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip formatter={(value: any) => [`R$ ${Number(value).toFixed(2)}`, 'Total']} />
-                  <Bar dataKey="total" fill="#F7931E" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-                Nenhuma venda encontrada
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Payment Breakdown Table */}
+      {/* Top produtos */}
       <Card>
         <CardHeader>
-          <CardTitle>Breakdown por Forma de Pagamento - {getReportTitle()}</CardTitle>
+          <CardTitle>Top 5 Produtos</CardTitle>
+          <CardDescription>Produtos mais vendidos no período</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="text-center p-4 border rounded-lg">
-              <p className="text-sm text-muted-foreground">Dinheiro</p>
-              <p className="text-xl font-semibold">R$ {paymentBreakdown.dinheiro.toFixed(2)}</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <p className="text-sm text-muted-foreground">Débito</p>
-              <p className="text-xl font-semibold">R$ {paymentBreakdown.debito.toFixed(2)}</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <p className="text-sm text-muted-foreground">Crédito</p>
-              <p className="text-xl font-semibold">R$ {paymentBreakdown.credito.toFixed(2)}</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <p className="text-sm text-muted-foreground">PIX</p>
-              <p className="text-xl font-semibold">R$ {paymentBreakdown.pix.toFixed(2)}</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <p className="text-sm text-muted-foreground">Cortesia</p>
-              <p className="text-xl font-semibold">R$ {paymentBreakdown.cortesia.toFixed(2)}</p>
-            </div>
+          <div className="space-y-4">
+            {topProducts.map((product, index) => (
+              <div key={product.name} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <p className="font-medium">{product.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {product.quantity} unidades vendidas
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">R$ {product.revenue.toFixed(2)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {((product.revenue / reportTotal) * 100).toFixed(1)}% do total
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Seção de Backup */}
-      <Card className="mt-6">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Database className="w-5 h-5" />
-              Backup e Restauração
-            </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowBackupSection(!showBackupSection)}
-            >
-              {showBackupSection ? 'Ocultar' : 'Mostrar'}
-            </Button>
-          </div>
-        </CardHeader>
-        {showBackupSection && (
+      {/* Seção de backup */}
+      {showBackupSection && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Backup e Restauração</CardTitle>
+            <CardDescription>Gerencie backups dos seus dados</CardDescription>
+          </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button
-                onClick={createManualBackup}
-                className="flex items-center gap-2"
-                variant="outline"
-              >
-                <Database className="w-4 h-4" />
+            <div className="flex gap-2">
+              <Button onClick={createManualBackup}>
+                <Database className="w-4 h-4 mr-2" />
                 Criar Backup
               </Button>
-              
-              <Button
-                onClick={exportBackup}
-                className="flex items-center gap-2"
-                variant="outline"
-              >
-                <Download className="w-4 h-4" />
-                Exportar Backup
+              <Button variant="outline" onClick={exportBackup}>
+                <Download className="w-4 h-4 mr-2" />
+                Exportar Dados
               </Button>
-              
-              <div className="relative">
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      importBackup(file);
-                    }
-                  }}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                <Button
-                  className="flex items-center gap-2 w-full"
-                  variant="outline"
-                >
-                  <Upload className="w-4 h-4" />
-                  Importar Backup
-                </Button>
-              </div>
+              <Button variant="outline" onClick={() => document.getElementById('import-backup')?.click()}>
+                <Upload className="w-4 h-4 mr-2" />
+                Importar Dados
+              </Button>
             </div>
-
-            {/* Lista de backups disponíveis */}
-            <div className="mt-4">
-              <h4 className="font-medium mb-2">Backups Disponíveis:</h4>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {getAvailableBackups().map((backup) => (
-                  <div
-                    key={backup.key}
-                    className="flex items-center justify-between p-2 border rounded-lg text-sm"
-                  >
-                    <span>{backup.date}</span>
-                    <span className="text-gray-500 text-xs">
-                      {backup.key.includes('manual') ? 'Manual' : 'Automático'}
-                    </span>
-                  </div>
-                ))}
-                {getAvailableBackups().length === 0 && (
-                  <p className="text-sm text-gray-500">Nenhum backup encontrado</p>
-                )}
-              </div>
-            </div>
+            <input
+              id="import-backup"
+              type="file"
+              accept=".json"
+              onChange={importBackup}
+              className="hidden"
+            />
           </CardContent>
-        )}
-      </Card>
+        </Card>
+      )}
     </div>
   );
 };

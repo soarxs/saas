@@ -50,267 +50,181 @@ interface AppState {
   clearTable: (tableNumber: number) => void;
   completeTableSale: (tableNumber: number, paymentMethod: PaymentMethod) => void;
   completeTableSaleWithSplit: (tableNumber: number, payments: Array<{method: PaymentMethod, amount: number}>) => void;
-  
-  // Users
-  users: User[];
-  addUser: (user: Omit<User, 'id'>) => void;
-  updateUser: (id: string, user: Partial<User>) => void;
-  deleteUser: (id: string) => void;
-  
-  // Utils
-  getCartTotal: () => number;
-  getCurrentShiftSales: () => Sale[];
-  getPaymentBreakdown: (sales: Sale[]) => any;
+  completePartialPayment: (tableNumber: number, paymentMethod: PaymentMethod, amount: number) => void;
+  getTableTotal: (tableNumber: number) => number;
 }
 
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
-      // Auth - sincronização com authStore
+      // Auth
       currentUser: null,
-      setCurrentUser: (user) => {
-        useAuthStore.getState().setCurrentUser(user);
-        set({ currentUser: user });
-      },
+      setCurrentUser: (user) => set({ currentUser: user }),
       updateUserPassword: (id, newPassword) => {
-        useAuthStore.getState().updateUserPassword(id, newPassword);
+        const authStore = useAuthStore.getState();
+        authStore.updateUserPassword(id, newPassword);
       },
       getUserPassword: (id) => {
-        return useAuthStore.getState().getUserPassword(id);
+        const authStore = useAuthStore.getState();
+        return authStore.getUserPassword(id);
       },
-      
-      // Shift - sincronização com shiftStore
+
+      // Shift
       currentShift: null,
       shifts: [],
       openShift: (user) => {
-        useShiftStore.getState().openShift(user);
-        const shiftState = useShiftStore.getState();
-        set({ 
-          currentShift: shiftState.currentShift,
-          shifts: shiftState.shifts 
-        });
+        const shiftStore = useShiftStore.getState();
+        shiftStore.openShift(user);
+        set({ currentShift: shiftStore.currentShift, shifts: shiftStore.shifts });
       },
       closeShift: () => {
-        useShiftStore.getState().closeShift();
-        const shiftState = useShiftStore.getState();
-        set({ 
-          currentShift: shiftState.currentShift,
-          shifts: shiftState.shifts 
-        });
+        const shiftStore = useShiftStore.getState();
+        shiftStore.closeShift();
+        set({ currentShift: shiftStore.currentShift, shifts: shiftStore.shifts });
       },
-      
-      // Products - sincronização com productStore
+
+      // Products
       products: [],
       addProduct: (product) => {
-        useProductStore.getState().addProduct(product);
-        set({ products: useProductStore.getState().products });
+        const productStore = useProductStore.getState();
+        productStore.addProduct(product);
+        set({ products: productStore.products });
       },
       updateProduct: (id, product) => {
-        useProductStore.getState().updateProduct(id, product);
-        set({ products: useProductStore.getState().products });
+        const productStore = useProductStore.getState();
+        productStore.updateProduct(id, product);
+        set({ products: productStore.products });
       },
       deleteProduct: (id) => {
-        useProductStore.getState().deleteProduct(id);
-        set({ products: useProductStore.getState().products });
+        const productStore = useProductStore.getState();
+        productStore.deleteProduct(id);
+        set({ products: productStore.products });
       },
       updateStock: (id, quantity, operation) => {
-        useProductStore.getState().updateStock(id, quantity, operation);
-        set({ products: useProductStore.getState().products });
+        const productStore = useProductStore.getState();
+        productStore.updateStock(id, quantity, operation);
+        set({ products: productStore.products });
       },
       getLowStockProducts: () => {
-        return useProductStore.getState().getLowStockProducts();
+        const productStore = useProductStore.getState();
+        return productStore.getLowStockProducts();
       },
-      
-      // Sales - sincronização com salesStore
+
+      // Sales
       sales: [],
       cart: [],
-      addToCart: (product, quantity) => {
-        const { currentShift } = get();
-        if (!currentShift?.isActive) return;
-        useSalesStore.getState().addToCart(product, quantity);
-        // Sincronizar automaticamente via subscription
+      addToCart: (product, quantity = 1) => {
+        const salesStore = useSalesStore.getState();
+        salesStore.addToCart(product, quantity);
+        set({ cart: salesStore.cart });
       },
       removeFromCart: (productId) => {
-        useSalesStore.getState().removeFromCart(productId);
-        // Sincronizar automaticamente via subscription
+        const salesStore = useSalesStore.getState();
+        salesStore.removeFromCart(productId);
+        set({ cart: salesStore.cart });
       },
       updateCartQuantity: (productId, quantity) => {
-        useSalesStore.getState().updateCartQuantity(productId, quantity);
-        // Sincronizar automaticamente via subscription
+        const salesStore = useSalesStore.getState();
+        salesStore.updateCartQuantity(productId, quantity);
+        set({ cart: salesStore.cart });
       },
       clearCart: () => {
-        useSalesStore.getState().clearCart();
-        // Sincronizar automaticamente via subscription
+        const salesStore = useSalesStore.getState();
+        salesStore.clearCart();
+        set({ cart: salesStore.cart });
       },
       completeSale: (paymentMethod, discount, discountType) => {
-        const { currentShift, currentUser } = get();
-        if (!currentShift || !currentUser) return;
-        useSalesStore.getState().completeSale(paymentMethod, discount, discountType);
-        // Sincronizar automaticamente via subscription
+        const salesStore = useSalesStore.getState();
+        const { currentShift } = get();
+        if (!currentShift) return;
+        
+        salesStore.completeSale(paymentMethod, discount, discountType, currentShift.id);
+        set({ sales: salesStore.sales, cart: salesStore.cart });
       },
       deleteSale: (saleId) => {
-        useSalesStore.getState().deleteSale(saleId);
-        // Sincronizar automaticamente via subscription
+        const salesStore = useSalesStore.getState();
+        salesStore.deleteSale(saleId);
+        set({ sales: salesStore.sales });
       },
       updateSalePaymentMethod: (saleId, paymentMethod) => {
-        useSalesStore.getState().updateSalePaymentMethod(saleId, paymentMethod);
-        // Sincronizar automaticamente via subscription
+        const salesStore = useSalesStore.getState();
+        salesStore.updateSalePaymentMethod(saleId, paymentMethod);
+        set({ sales: salesStore.sales });
       },
-      
-      // Tables - sincronização com tableStore
+
+      // Tables
       tables: [],
-      addToTable: (tableNumber, product, quantity) => {
-        const { currentShift } = get();
-        if (!currentShift?.isActive) return;
-        useTableStore.getState().addProductToTable(tableNumber, product, quantity);
-        set({ tables: useTableStore.getState().tables });
+      addToTable: (tableNumber, product, quantity = 1) => {
+        const tableStore = useTableStore.getState();
+        tableStore.addProductToTable(tableNumber, product, quantity);
+        set({ tables: tableStore.tables });
       },
       removeFromTable: (tableNumber, productId, uniqueId) => {
-        useTableStore.getState().removeProductFromTable(tableNumber, productId, uniqueId);
-        set({ tables: useTableStore.getState().tables });
+        const tableStore = useTableStore.getState();
+        tableStore.removeProductFromTable(tableNumber, productId, uniqueId);
+        set({ tables: tableStore.tables });
       },
       updateTableQuantity: (tableNumber, productId, quantity) => {
-        useTableStore.getState().updateProductQuantity(tableNumber, productId, quantity);
-        set({ tables: useTableStore.getState().tables });
+        const tableStore = useTableStore.getState();
+        tableStore.updateProductQuantity(tableNumber, productId, quantity);
+        set({ tables: tableStore.tables });
       },
       updateTableProductPrice: (tableNumber, productId, newPrice) => {
-        useTableStore.getState().updateTableProductPrice(tableNumber, productId, newPrice);
-        set({ tables: useTableStore.getState().tables });
+        const tableStore = useTableStore.getState();
+        tableStore.updateTableProductPrice(tableNumber, productId, newPrice);
+        set({ tables: tableStore.tables });
       },
       updateIndividualProduct: (tableNumber, uniqueId, newPrice, modifications) => {
-        useTableStore.getState().updateIndividualProduct(tableNumber, uniqueId, newPrice, modifications);
-        set({ tables: useTableStore.getState().tables });
+        const tableStore = useTableStore.getState();
+        tableStore.updateIndividualProduct(tableNumber, uniqueId, newPrice, modifications);
+        set({ tables: tableStore.tables });
       },
       updateTableStatus: (tableNumber, status) => {
-        useTableStore.getState().updateTableStatus(tableNumber, status);
-        set({ tables: useTableStore.getState().tables });
+        const tableStore = useTableStore.getState();
+        tableStore.updateTableStatus(tableNumber, status);
+        set({ tables: tableStore.tables });
       },
       clearTable: (tableNumber) => {
-        useTableStore.getState().clearTable(tableNumber);
-        set({ tables: useTableStore.getState().tables });
+        const tableStore = useTableStore.getState();
+        tableStore.clearTable(tableNumber);
+        set({ tables: tableStore.tables });
       },
       completeTableSale: (tableNumber, paymentMethod) => {
-        useTableStore.getState().completeTableSale(tableNumber, paymentMethod);
-        const tableState = useTableStore.getState();
-        const salesState = useSalesStore.getState();
-        set({ 
-          tables: tableState.tables,
-          sales: salesState.sales 
-        });
+        const tableStore = useTableStore.getState();
+        const { currentShift } = get();
+        if (!currentShift) return;
+        
+        tableStore.completeTableSale(tableNumber, paymentMethod);
+        set({ tables: tableStore.tables });
       },
       completeTableSaleWithSplit: (tableNumber, payments) => {
-        useTableStore.getState().completeTableSaleWithSplit(tableNumber, payments);
-        const tableState = useTableStore.getState();
-        const salesState = useSalesStore.getState();
-        set({ 
-          tables: tableState.tables,
-          sales: salesState.sales 
-        });
+        const tableStore = useTableStore.getState();
+        const { currentShift } = get();
+        if (!currentShift) return;
+        
+        tableStore.completeTableSaleWithSplit(tableNumber, payments);
+        set({ tables: tableStore.tables });
       },
-      
-      // Users - sincronização com authStore
-      users: [],
-      addUser: (user) => {
-        useAuthStore.getState().addUser(user);
-        set({ users: useAuthStore.getState().users });
+      completePartialPayment: (tableNumber, paymentMethod, amount) => {
+        const tableStore = useTableStore.getState();
+        tableStore.completePartialPayment(tableNumber, paymentMethod, amount);
+        set({ tables: tableStore.tables });
       },
-      updateUser: (id, user) => {
-        useAuthStore.getState().updateUser(id, user);
-        set({ users: useAuthStore.getState().users });
-      },
-      deleteUser: (id) => {
-        useAuthStore.getState().deleteUser(id);
-        set({ users: useAuthStore.getState().users });
-      },
-      
-      // Utils
-      getCartTotal: () => {
-        return useSalesStore.getState().getCartTotal();
-      },
-      getCurrentShiftSales: () => {
-        const sales = useSalesStore.getState().sales;
-        const currentShift = useShiftStore.getState().currentShift;
-        if (!currentShift) return sales; // Retornar todas as vendas se não há turno ativo
-        return sales.filter(sale => sale.shiftId === currentShift.id);
-      },
-      getPaymentBreakdown: (sales) => {
-        return sales.reduce((breakdown, sale) => {
-          breakdown[sale.paymentMethod] += sale.total;
-          return breakdown;
-        }, {
-          dinheiro: 0,
-          debito: 0,
-          credito: 0,
-          pix: 0,
-          cortesia: 0,
-        });
+      getTableTotal: (tableNumber) => {
+        const tableStore = useTableStore.getState();
+        return tableStore.getTableTotal(tableNumber);
       },
     }),
     {
-      name: 'burger-pdv-storage',
+      name: 'pdv-store',
       partialize: (state) => ({
         currentUser: state.currentUser,
         currentShift: state.currentShift,
+        shifts: state.shifts,
+        products: state.products,
+        sales: state.sales,
+        tables: state.tables,
       }),
     }
   )
 );
-
-// Sincronizar com os stores individuais na inicialização
-const syncStores = () => {
-  const authState = useAuthStore.getState();
-  const shiftState = useShiftStore.getState();
-  const productState = useProductStore.getState();
-  const salesState = useSalesStore.getState();
-  const tableState = useTableStore.getState();
-  
-  useStore.setState({
-    currentUser: authState.currentUser,
-    users: authState.users,
-    currentShift: shiftState.currentShift,
-    shifts: shiftState.shifts,
-    products: productState.products,
-    sales: salesState.sales,
-    cart: salesState.cart,
-    tables: tableState.tables,
-  });
-};
-
-// Executar sincronização na inicialização
-if (typeof window !== 'undefined') {
-  syncStores();
-  
-  // Observar mudanças nos stores individuais
-  useAuthStore.subscribe((state) => {
-    useStore.setState({
-      currentUser: state.currentUser,
-      users: state.users,
-    });
-  });
-  
-  useShiftStore.subscribe((state) => {
-    useStore.setState({
-      currentShift: state.currentShift,
-      shifts: state.shifts,
-    });
-  });
-  
-  useProductStore.subscribe((state) => {
-    useStore.setState({
-      products: state.products,
-    });
-  });
-  
-  useSalesStore.subscribe((state) => {
-    useStore.setState({
-      sales: state.sales,
-      cart: state.cart,
-    });
-  });
-  
-  useTableStore.subscribe((state) => {
-    useStore.setState({
-      tables: state.tables,
-    });
-  });
-}
