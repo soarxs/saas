@@ -26,13 +26,13 @@ const TableGrid: React.FC<TableGridProps> = ({ onTableSelect }) => {
 
   // Calcular estatísticas
   const todayOrders = getTodayOrders();
-  const occupiedTables = Array.from({ length: 99 }, (_, i) => i + 1)
+  const occupiedTables = Array.from({ length: 20 }, (_, i) => i + 1)
     .filter(num => {
       const orders = getOrdersByTable(num);
       return orders.length > 0;
     });
   
-  const freeTables = 99 - occupiedTables.length;
+  const freeTables = 20 - occupiedTables.length;
   const occupiedCount = occupiedTables.length;
   const readyOrders = todayOrders.filter(order => order.status === 'ready').length;
 
@@ -282,8 +282,8 @@ const TableGrid: React.FC<TableGridProps> = ({ onTableSelect }) => {
               <div className="text-sm">{formatCurrency(getTableTotal(0))}</div>
             </button>
 
-            {/* Mesas 01-99 */}
-            {Array.from({ length: 99 }, (_, i) => i + 1).map(num => {
+            {/* Mesas 01-20 */}
+            {Array.from({ length: 20 }, (_, i) => i + 1).map(num => {
               const isOccupied = isTableOccupied(num);
               const total = getTableTotal(num);
               

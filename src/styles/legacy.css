@@ -232,10 +232,10 @@
   background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
 }
 
-/* Grid de mesas responsivo */
+/* Grid de mesas responsivo - 20 mesas */
 .legacy-mesa-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 1rem;
   padding: 1.5rem;
   max-width: 100%;
@@ -421,16 +421,10 @@
   font-weight: bold;
 }
 
-/* Responsividade completa */
-@media (max-width: 1400px) {
-  .legacy-mesa-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  }
-}
-
+/* Responsividade para grid de 20 mesas (5x4) */
 @media (max-width: 1200px) {
   .legacy-mesa-grid {
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
   }
   
@@ -453,7 +447,7 @@
   }
   
   .legacy-mesa-grid {
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.5rem;
     padding: 1rem;
   }
@@ -476,7 +470,7 @@
   }
   
   .legacy-mesa-grid {
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
     padding: 0.75rem;
   }
@@ -502,8 +496,8 @@
 
 @media (max-width: 640px) {
   .legacy-mesa-grid {
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-    gap: 0.25rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
     padding: 0.5rem;
   }
   
@@ -534,7 +528,7 @@
 
 @media (max-width: 480px) {
   .legacy-mesa-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.25rem;
   }
   
