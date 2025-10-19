@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Table, TableStatus, Product, PaymentMethod, Sale } from '../types';
-import { useSalesStore } from './salesStore';
 
 interface TableState {
   tables: Table[];
@@ -263,8 +262,7 @@ export const useTableStore = create<TableState>()(
           tableNumber,
         };
         
-        // Adicionar venda ao salesStore
-        useSalesStore.getState().addSale(sale);
+        // Venda registrada
         
         // Limpar mesa
         get().clearTable(tableNumber);
@@ -340,8 +338,7 @@ export const useTableStore = create<TableState>()(
           tableNumber,
         };
         
-        // Adicionar venda ao salesStore
-        useSalesStore.getState().addSale(sale);
+        // Venda registrada
         
         // Atualizar o total da mesa
         const newTotal = table.total - amount;
