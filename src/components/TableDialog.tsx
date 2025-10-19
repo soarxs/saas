@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useStore } from '../store/useStore';
 import { useTableOperations } from '../hooks/useTableOperations';
 import { formatCurrency } from '../utils/formatters';
@@ -140,27 +138,39 @@ const TableDialog: React.FC<TableDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl bg-[#A5C9D4] p-0">
+      <DialogContent className="max-w-4xl legacy-dialog-content p-0">
         <DialogDescription className="sr-only">
           Interface para gerenciar {isBalcao ? 'BALCÃO' : `Mesa ${tableNumber}`}
         </DialogDescription>
         
         {/* Header do Dialog */}
         <div className="legacy-dialog-header">
-          <div className="bg-white p-2 rounded mb-4 flex justify-between items-center">
-            <div className="text-xl font-bold">
-              Mesa/Comanda: {isBalcao ? 'BALCÃO' : tableNumber}
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <div className="text-white">
+                <div className="text-2xl font-bold">CIA DO LANCHE</div>
+                <div className="text-sm">Mesa/Comanda O</div>
+              </div>
+              <div className="flex space-x-2">
+                <div className="bg-red-600 text-white px-3 py-1 rounded text-lg font-bold">1</div>
+                <div className="bg-white text-black px-3 py-1 rounded text-lg font-bold">0</div>
+              </div>
             </div>
-            <div className="flex gap-2">
+            <div className="text-center">
+              <div className="text-white text-xl font-bold">
+                Mesa/Comanda: {isBalcao ? 'BALCÃO' : tableNumber}
+              </div>
+            </div>
+            <div className="flex space-x-2">
               <button 
                 onClick={() => handleFinalize(true)}
-                className="legacy-button legacy-button-green"
+                className="legacy-button legacy-button-green px-4 py-2"
               >
                 ✓ Finalizar / Imprimir(F2)
               </button>
               <button 
                 onClick={() => handleFinalize(false)}
-                className="legacy-button legacy-button-red"
+                className="legacy-button legacy-button-red px-4 py-2"
               >
                 ⊗ Finalizar / Não Imprimir(F3)
               </button>
@@ -177,7 +187,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
                 type="text" 
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="legacy-input"
+                className="w-full p-2 border-2 border-gray-400 rounded"
                 placeholder="Nome do cliente"
               />
             </div>
@@ -188,7 +198,7 @@ const TableDialog: React.FC<TableDialogProps> = ({
                 value={people}
                 onChange={(e) => setPeople(parseInt(e.target.value) || 1)}
                 min="1"
-                className="legacy-input"
+                className="w-full p-2 border-2 border-gray-400 rounded"
               />
             </div>
           </div>
@@ -208,11 +218,11 @@ const TableDialog: React.FC<TableDialogProps> = ({
                   }
                 }}
                 placeholder="Digite o código ou F1 para buscar"
-                className="flex-1 legacy-input"
+                className="flex-1 p-2 border-2 border-gray-400 rounded"
               />
               <button 
                 onClick={() => setShowProductSearch(true)}
-                className="legacy-button legacy-button-gray"
+                className="legacy-button legacy-button-gray px-4 py-2"
               >
                 📋
               </button>
@@ -222,41 +232,43 @@ const TableDialog: React.FC<TableDialogProps> = ({
           {/* Tabela de produtos lançados */}
           <div>
             <div className="font-bold mb-2">Produtos lançados</div>
-            <table className="legacy-table">
-              <thead>
-                <tr>
-                  <th className="p-2">Cód.</th>
-                  <th className="p-2">Produto</th>
-                  <th className="p-2">Qtde</th>
-                  <th className="p-2">Preço</th>
-                  <th className="p-2">Total</th>
-                  <th className="p-2">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tableData?.orders.map((order: any, index: number) => (
-                  <tr key={index}>
-                    <td className="p-2">{order.productId}</td>
-                    <td className="p-2">{order.name}</td>
-                    <td className="p-2">{order.quantity}</td>
-                    <td className="p-2">{formatCurrency(order.price)}</td>
-                    <td className="p-2">{formatCurrency(order.subtotal)}</td>
-                    <td className="p-2">
-                      <button className="legacy-button legacy-button-red text-xs">
-                        Remover
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {(!tableData?.orders || tableData.orders.length === 0) && (
+            <div className="bg-blue-800 text-white p-4 rounded">
+              <table className="w-full text-white">
+                <thead>
                   <tr>
-                    <td colSpan={6} className="p-4 text-center text-gray-500">
-                      Nenhum produto adicionado
-                    </td>
+                    <th className="p-2 text-left">Cód.</th>
+                    <th className="p-2 text-left">Produto</th>
+                    <th className="p-2 text-left">Qtde</th>
+                    <th className="p-2 text-left">Preço</th>
+                    <th className="p-2 text-left">Total</th>
+                    <th className="p-2 text-left">Ações</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {tableData?.orders.map((order: any, index: number) => (
+                    <tr key={index} className="border-b border-blue-600">
+                      <td className="p-2">{order.productId}</td>
+                      <td className="p-2">{order.name}</td>
+                      <td className="p-2">{order.quantity}</td>
+                      <td className="p-2">{formatCurrency(order.price)}</td>
+                      <td className="p-2">{formatCurrency(order.subtotal)}</td>
+                      <td className="p-2">
+                        <button className="legacy-button legacy-button-red text-xs px-2 py-1">
+                          Remover
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {(!tableData?.orders || tableData.orders.length === 0) && (
+                    <tr>
+                      <td colSpan={6} className="p-4 text-center text-blue-200">
+                        Nenhum produto adicionado
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Total */}
@@ -281,13 +293,13 @@ const TableDialog: React.FC<TableDialogProps> = ({
           <div className="flex gap-2 justify-end">
             <button 
               onClick={() => setShowPayment(true)}
-              className="legacy-button legacy-button-green"
+              className="legacy-button legacy-button-green px-4 py-2"
             >
               💰 Pagamento
             </button>
             <button 
               onClick={onClose}
-              className="legacy-button legacy-button-gray"
+              className="legacy-button legacy-button-gray px-4 py-2"
             >
               ⊗ Cancelar(F4)
             </button>

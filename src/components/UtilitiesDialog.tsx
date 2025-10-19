@@ -75,6 +75,7 @@ const UtilitiesDialog: React.FC<UtilitiesDialogProps> = ({
       openShift();
       toast.success('Turno aberto com sucesso');
     }
+    onClose();
   };
 
   // Função para relatórios
@@ -100,78 +101,50 @@ const UtilitiesDialog: React.FC<UtilitiesDialogProps> = ({
     if (confirm('Tem certeza que deseja sair do sistema?')) {
       window.location.reload();
     }
+    onClose();
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-center">Menu Opções</DialogTitle>
+      <DialogContent className="max-w-md legacy-dialog-content">
+        <DialogHeader className="legacy-dialog-header">
+          <DialogTitle className="text-white text-xl font-bold">Menu Opções</DialogTitle>
           <DialogDescription className="sr-only">
-            Menu de utilitários do sistema PDV
+            Menu de opções do sistema, incluindo gerenciamento de turno e saída.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-3 p-4">
-          {/* Abrir/Fechar Turno */}
+        <div className="p-6 space-y-4">
           <button 
             onClick={handleShiftToggle}
-            className="w-full legacy-button legacy-button-green text-left"
+            className="legacy-button legacy-button-blue w-full text-lg py-3"
           >
-            <span className="font-bold">Abrir/ Fechar Turno(F2)</span>
-            <div className="text-sm opacity-90">
-              {currentShift?.isActive ? 'Turno Ativo' : 'Turno Fechado'}
-            </div>
+            Abrir/ Fechar Turno(F2)
           </button>
-
-          {/* Relatórios */}
           <button 
             onClick={handleReports}
-            className="w-full legacy-button legacy-button-gray text-left"
+            className="legacy-button legacy-button-gray w-full text-lg py-3"
           >
-            <span className="font-bold">Relatórios(F3)</span>
-            <div className="text-sm opacity-90">
-              Relatórios de vendas e operações
-            </div>
+            Relátorios(F3)
           </button>
-
-          {/* Menu Gerencial */}
           <button 
             onClick={handleManagerMenu}
-            className="w-full legacy-button legacy-button-gray text-left"
+            className="legacy-button legacy-button-gray w-full text-lg py-3"
           >
-            <span className="font-bold">Menu Gerencial(F4)</span>
-            <div className="text-sm opacity-90">
-              Funções administrativas
-            </div>
+            Menu Gerencial(F4)
           </button>
-
-          {/* Configurações */}
           <button 
             onClick={handleSettings}
-            className="w-full legacy-button legacy-button-gray text-left"
+            className="legacy-button legacy-button-gray w-full text-lg py-3"
           >
-            <span className="font-bold">Configurações(F5)</span>
-            <div className="text-sm opacity-90">
-              Configurações do sistema
-            </div>
+            Configurações(F5)
           </button>
-
-          {/* Sair */}
           <button 
             onClick={handleExit}
-            className="w-full legacy-button legacy-button-red text-left"
+            className="legacy-button legacy-button-red w-full text-lg py-3"
           >
-            <span className="font-bold">Sair(F6)</span>
-            <div className="text-sm opacity-90">
-              Sair do sistema
-            </div>
+            Sair(F6)
           </button>
-        </div>
-
-        {/* Informações de atalhos */}
-        <div className="text-center text-sm text-gray-600 mt-4">
-          Use F2-F6 para selecionar opções, Esc para fechar
         </div>
       </DialogContent>
     </Dialog>
