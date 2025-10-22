@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTables } from '../contexts/TableContext'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog'
 import { Button } from './ui/button'
@@ -32,14 +32,21 @@ export function OrderDialog({ open, onOpenChange, selectedTable }: OrderDialogPr
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [loading, setLoading] = useState(false)
+  const hasOpenedTable = useRef(false)
 
   // Abre a mesa automaticamente se ela estiver livre
   useEffect(() => {
-    if (open && selectedTable && selectedTable.status === 'livre') {
+    if (open && selectedTable && selectedTable.status === 'livre' && !hasOpenedTable.current) {
       // Abre a mesa automaticamente com dados padrão
       openTable(selectedTable.id, 'Cliente', 1)
+      hasOpenedTable.current = true
     }
-  }, [open, selectedTable, openTable])
+    
+    // Reset quando o dialog fecha
+    if (!open) {
+      hasOpenedTable.current = false
+    }
+  }, [open, selectedTable?.id, openTable])
 
   const tableOrders = selectedTable ? getTableOrdersWithProducts(selectedTable.id) : []
   const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))]
