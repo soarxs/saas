@@ -8,10 +8,12 @@ import {
   X,
   Store,
   MapPin,
-  Printer
+  Printer,
+  LogOut
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import { Button } from './ui/button'
 import { cn } from '@/lib/utils'
 
@@ -33,6 +35,13 @@ export function Layout() {
   })
   const location = useLocation()
   const navigate = useNavigate()
+  const { user, logout, canAccessRoute } = useAuth()
+
+  // Filtrar navegação baseada nas permissões do usuário
+  const filteredNavigation = navigation.filter(item => {
+    if (item.href === '/') return true // Dashboard sempre acessível
+    return canAccessRoute(item.href)
+  })
 
   useEffect(() => {
     localStorage.setItem('sidebarCollapsed', JSON.stringify(sidebarCollapsed))
@@ -77,7 +86,7 @@ export function Layout() {
             </Button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {navigation.map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive = location.pathname === item.href
               return (
                 <Link
@@ -120,7 +129,7 @@ export function Layout() {
             </Button>
           </div>
           <nav className="mt-5 flex-1 space-y-1 px-2">
-            {navigation.map((item) => {
+            {filteredNavigation.map((item) => {
               const isActive = location.pathname === item.href
               return (
                 <Link
@@ -171,10 +180,22 @@ export function Layout() {
                 </div>
               </div>
             </div>
-            <div className="ml-4 flex items-center md:ml-6">
+            <div className="ml-4 flex items-center md:ml-6 space-x-4">
               <div className="text-sm text-gray-500">
-                Operador: <span className="font-medium text-gray-900">Usuário Demo</span>
+                <span className="font-medium text-gray-900">{user?.name}</span>
+                <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                  {user?.role.toUpperCase()}
+                </span>
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="text-gray-500 hover:text-red-600"
+                title="Sair do sistema"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
