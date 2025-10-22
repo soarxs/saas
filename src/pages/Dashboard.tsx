@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTables } from '../contexts/TableContext'
+import { useShift } from '../contexts/ShiftContext'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -19,6 +20,7 @@ import { PaymentDialog } from '../components/PaymentDialog'
 
 export function Dashboard() {
   const { tables, orders, loading } = useTables()
+  const { currentShift } = useShift()
   const [selectedTable, setSelectedTable] = useState<any>(null)
   const [openTableDialog, setOpenTableDialog] = useState(false)
   const [orderDialog, setOrderDialog] = useState(false)
@@ -41,6 +43,10 @@ export function Dashboard() {
   })
 
   const handleTableClick = (table: any) => {
+    if (!currentShift) {
+      alert('Você precisa abrir um turno antes de fazer lançamentos!\n\nAcesse: Admin → Abrir Turno')
+      return
+    }
     setSelectedTable(table)
     if (table.status === 'livre') {
       setOpenTableDialog(true)
@@ -71,7 +77,13 @@ export function Dashboard() {
           <p className="text-gray-600">Gerencie suas mesas e pedidos</p>
         </div>
         <div className="flex space-x-2">
-          <Button onClick={() => setOpenTableDialog(true)}>
+          <Button onClick={() => {
+            if (!currentShift) {
+              alert('Você precisa abrir um turno antes de fazer lançamentos!\n\nAcesse: Admin → Abrir Turno')
+              return
+            }
+            setOpenTableDialog(true)
+          }}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Mesa
           </Button>

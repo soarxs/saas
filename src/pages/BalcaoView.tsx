@@ -28,6 +28,7 @@ import toast from 'react-hot-toast'
 
 export function BalcaoView() {
   const { products } = useTables()
+  const { currentShift } = useShift()
   const { 
     cartItems, 
     deliveryInfo, 
@@ -71,6 +72,10 @@ export function BalcaoView() {
   }, [])
 
   const handleProductClick = (product: any) => {
+    if (!currentShift) {
+      alert('Você precisa abrir um turno antes de fazer lançamentos!\n\nAcesse: Admin → Abrir Turno')
+      return
+    }
     setSelectedProduct(product)
     setPriceDialogOpen(true)
   }
