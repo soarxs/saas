@@ -79,29 +79,6 @@ export const tableStatus = {
   }
 }
 
-// Status dos pedidos
-export const orderStatus = {
-  pendente: {
-    label: 'Pendente',
-    color: 'yellow',
-    icon: '⏳'
-  },
-  preparando: {
-    label: 'Preparando',
-    color: 'blue',
-    icon: '👨‍🍳'
-  },
-  pronto: {
-    label: 'Pronto',
-    color: 'green',
-    icon: '✅'
-  },
-  entregue: {
-    label: 'Entregue',
-    color: 'gray',
-    icon: '📦'
-  }
-}
 
 // Formas de pagamento
 export const paymentMethods = {

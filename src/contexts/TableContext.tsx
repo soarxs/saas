@@ -11,7 +11,6 @@ interface TableContextType {
   openTable: (tableNumber: number, customerName?: string, customerCount?: number) => Promise<void>
   closeTable: (tableId: string) => Promise<void>
   addOrder: (tableId: string, productId: string, quantity: number, notes?: string) => Promise<void>
-  updateOrderStatus: (orderId: string, status: Order['status']) => Promise<void>
   getTableOrders: (tableId: string) => Order[]
   getTableOrdersWithProducts: (tableId: string) => (Order & { product: Product })[]
   refreshTables: () => Promise<void>
@@ -92,17 +91,10 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
           : table
       )
 
-      // Marcar pedidos como entregues
-      const updatedOrders = orders.map(order => 
-        order.table_id === tableId 
-          ? { ...order, status: 'entregue' as const, updated_at: new Date().toISOString() }
-          : order
-      )
+      // Não precisamos mais marcar status dos pedidos
 
       setTables(updatedTables)
-      setOrders(updatedOrders)
       storage.saveTables(updatedTables)
-      storage.saveOrders(updatedOrders)
       toast.success('Mesa fechada com sucesso!')
     } catch (error) {
       console.error('Erro ao fechar mesa:', error)
@@ -127,7 +119,6 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
         unit_price: product.price,
         total_price: product.price * quantity,
         notes,
-        status: 'pendente',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
@@ -146,28 +137,11 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const updateOrderStatus = async (orderId: string, status: Order['status']) => {
-    try {
-      const updatedOrders = orders.map(order => 
-        order.id === orderId 
-          ? { ...order, status, updated_at: new Date().toISOString() }
-          : order
-      )
-
-      setOrders(updatedOrders)
-      storage.saveOrders(updatedOrders)
-      toast.success('Status do pedido atualizado!')
-    } catch (error) {
-      console.error('Erro ao atualizar pedido:', error)
-      toast.error('Erro ao atualizar pedido')
-      throw error
-    }
-  }
 
   const updateTableTotal = async (tableId: string) => {
     try {
       const tableOrders = orders.filter(order => 
-        order.table_id === tableId && order.status !== 'entregue'
+        order.table_id === tableId
       )
       const total = tableOrders.reduce((sum, order) => sum + order.total_price, 0)
 
@@ -237,7 +211,6 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
     openTable,
     closeTable,
     addOrder,
-    updateOrderStatus,
     getTableOrders,
     getTableOrdersWithProducts,
     refreshTables,

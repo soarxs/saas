@@ -11,7 +11,7 @@ import {
   Search,
   ShoppingCart
 } from 'lucide-react'
-import { formatCurrency, getOrderStatusColor } from '../lib/utils'
+import { formatCurrency } from '../lib/utils'
 
 interface OrderDialogProps {
   open: boolean
@@ -24,7 +24,6 @@ export function OrderDialog({ open, onOpenChange, selectedTable }: OrderDialogPr
     products, 
     addOrder, 
     getTableOrdersWithProducts, 
-    updateOrderStatus,
     closeTable,
     openTable
   } = useTables()
@@ -71,16 +70,6 @@ export function OrderDialog({ open, onOpenChange, selectedTable }: OrderDialogPr
     }
   }
 
-  const handleUpdateOrderStatus = async (orderId: string, status: any) => {
-    setLoading(true)
-    try {
-      await updateOrderStatus(orderId, status)
-    } catch (error) {
-      console.error('Erro ao atualizar pedido:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleCloseTable = async () => {
     if (!selectedTable) return
@@ -204,18 +193,7 @@ export function OrderDialog({ open, onOpenChange, selectedTable }: OrderDialogPr
                         </div>
                       </div>
                       
-                      <div className="flex items-center justify-between">
-                        <select
-                          value={order.status}
-                          onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
-                          className={`text-xs px-2 py-1 rounded-full border-0 ${getOrderStatusColor(order.status)}`}
-                        >
-                          <option value="pendente">Pendente</option>
-                          <option value="preparando">Preparando</option>
-                          <option value="pronto">Pronto</option>
-                          <option value="entregue">Entregue</option>
-                        </select>
-                        
+                      <div className="flex items-center justify-end">
                         <div className="flex items-center space-x-1">
                           <Button
                             size="sm"

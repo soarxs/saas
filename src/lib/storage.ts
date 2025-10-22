@@ -35,7 +35,6 @@ export interface Order {
   unit_price: number
   total_price: number
   notes?: string
-  status: 'pendente' | 'preparando' | 'pronto' | 'entregue'
   created_at: string
   updated_at: string
 }
