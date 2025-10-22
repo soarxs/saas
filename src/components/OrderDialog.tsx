@@ -96,6 +96,14 @@ export function OrderDialog({ open, onOpenChange, selectedTable }: OrderDialogPr
     }
   }
 
+  // Fecha mesa automaticamente se não houver pedidos
+  useEffect(() => {
+    if (open && selectedTable && tableOrders.length === 0 && selectedTable.status === 'ocupada') {
+      // Se a mesa está ocupada mas não tem pedidos, volta para livre
+      closeTable(selectedTable.id)
+    }
+  }, [tableOrders.length, selectedTable?.id, selectedTable?.status, open, closeTable])
+
   const totalAmount = tableOrders.reduce((sum, order) => sum + order.total_price, 0)
 
   if (!selectedTable) return null
@@ -255,7 +263,7 @@ export function OrderDialog({ open, onOpenChange, selectedTable }: OrderDialogPr
             onClick={handleCloseTable}
             disabled={loading}
           >
-            Fechar Mesa
+            {loading ? 'Cancelando...' : 'Cancelar Mesa'}
           </Button>
           <div className="flex space-x-2">
             <Button
