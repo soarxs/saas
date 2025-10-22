@@ -41,7 +41,6 @@ export function BalcaoView() {
     getCartItemsCount,
     addDeliveryFee
   } = useBalcao()
-  const { currentShift } = useShift()
   
   const [activeTab, setActiveTab] = useState<'balcao' | 'delivery'>('balcao')
   const [searchTerm, setSearchTerm] = useState('')

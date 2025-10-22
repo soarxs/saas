@@ -9,7 +9,6 @@ import {
   Clock, 
   DollarSign, 
   ShoppingCart,
-  Plus,
   Search,
   Filter
 } from 'lucide-react'
@@ -48,8 +47,13 @@ export function Dashboard() {
       return
     }
     setSelectedTable(table)
+    
+    // Se a mesa estiver livre, abre automaticamente e vai direto para pedidos
     if (table.status === 'livre') {
-      setOpenTableDialog(true)
+      // Abre a mesa automaticamente (sem dialog)
+      // Aqui você pode adicionar a lógica para abrir a mesa automaticamente
+      // Por enquanto, vamos direto para o dialog de pedidos
+      setOrderDialog(true)
     } else {
       setOrderDialog(true)
     }
@@ -77,16 +81,9 @@ export function Dashboard() {
           <p className="text-gray-600">Gerencie suas mesas e pedidos</p>
         </div>
         <div className="flex space-x-2">
-          <Button onClick={() => {
-            if (!currentShift) {
-              alert('Você precisa abrir um turno antes de fazer lançamentos!\n\nAcesse: Admin → Abrir Turno')
-              return
-            }
-            setOpenTableDialog(true)
-          }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Mesa
-          </Button>
+          <div className="text-sm text-gray-500">
+            Clique em uma mesa para fazer pedidos
+          </div>
         </div>
       </div>
 
