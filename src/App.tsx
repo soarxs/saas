@@ -3,7 +3,7 @@ import { AuthProvider } from './contexts/AuthContext'
 import { TableProvider } from './contexts/TableContext'
 import { ShiftProvider } from './contexts/ShiftContext'
 import { BalcaoProvider } from './contexts/BalcaoContext'
-import { Layout } from './components/Layout'
+import { MainLayout } from './components/MainLayout'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { AdminPanel } from './pages/AdminPanel'
@@ -24,7 +24,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/" element={
                 <ProtectedRoute>
-                  <Layout />
+                  <MainLayout />
                 </ProtectedRoute>
               }>
                 <Route index element={<Dashboard />} />
